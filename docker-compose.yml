@@ -1,0 +1,19 @@
+version: '3'
+services:
+  mongodb:
+    image: 'mongo'
+    container_name: "guessit-mongo"
+    ports:
+      - "27017:27017"
+  golang:
+    env_file:
+      - .env
+    build: '.'
+    container_name: "guessit-backend"
+    links:
+      - mongodb
+    volumes:
+      - .:/src
+    ports:
+      - "5000:5000"
+  

@@ -30,4 +30,4 @@ EXPOSE 5000
 
 USER nobody:nobody
 
-ENTRYPOINT ["/app/server"]
+ENTRYPOINT ["/app"]
