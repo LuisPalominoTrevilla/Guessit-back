@@ -53,4 +53,4 @@ For db management it is recommended that you use [Robo3T](https://robomongo.org/
 ## Other Guessit repositories
 - [front end](https://github.com/LuisPalominoTrevilla/Guessit-front)
 
-*Happy coding!*
+**Happy coding!**
