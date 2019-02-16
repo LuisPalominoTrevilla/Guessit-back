@@ -18,14 +18,17 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// UserController wraps the UserDB inside the controller
 type UserController struct {
 	userDB *database.UserDB
 }
 
+// Get serves as a simple get request for the model User
 func (controller *UserController) Get(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hola Mundo desde usuario")
 }
 
+// Login serves as the endpoint to loggin the user
 func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) {
 	type cred struct {
 		Username string `json:"username"`
@@ -73,11 +76,13 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	encoder.Encode(response)
 }
 
+// InitializeController initializes the routes
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
 }
 
+// SetUserController creates the userController and wraps the user collection into UserDB
 func SetUserController(r *mux.Router, db *mongo.Database) {
 	user := database.UserDB{Users: db.Collection("users")}
 	userController := UserController{userDB: &user}

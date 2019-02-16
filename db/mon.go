@@ -12,13 +12,16 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo/readpref"
 )
 
+// Model serves as a wrapper for models
 type Model interface{}
 
+// Database is the interface that contains all relevant methods for each model
 type Database interface {
 	Get(bson.D, *Model)
 	Insert(Model)
 }
 
+// InitDb initializes the database and returns it
 func InitDb() *mongo.Database {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(ctx, "mongodb://mongodb:27017")

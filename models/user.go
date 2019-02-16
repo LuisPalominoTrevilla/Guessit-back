@@ -2,6 +2,7 @@ package models
 
 import "github.com/mongodb/mongo-go-driver/bson/primitive"
 
+// User represents the model for the user
 type User struct {
 	ID       primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name     string             `json:"name"`

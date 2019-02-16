@@ -5,6 +5,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// GetRouter receives a database and returns the application router
 func GetRouter(db *mongo.Database) *mux.Router {
 	r := mux.NewRouter()
 	SetAPIRouter(r, db)
