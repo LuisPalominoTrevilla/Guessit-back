@@ -1,13 +1,20 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
-	database "github.com/LuisPalominoTrevilla/Guessit-back/db"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
+
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
-	"github.com/gorilla/mux"
+
+	auth "github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 	"github.com/mongodb/mongo-go-driver/bson"
+
+	database "github.com/LuisPalominoTrevilla/Guessit-back/db"
+	"github.com/gorilla/mux"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
@@ -20,19 +27,55 @@ func (controller *UserController) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) {
-	filter := bson.D{{"email", "luispalominot@hotmail.com"}}
-	var foundUser models.User
-	err := controller.userDB.Get(filter, &foundUser)
-	if err != nil {
-		fmt.Println("Not able to retrieve documents")
+	type cred struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
 	}
-	fmt.Println(foundUser.Name, foundUser.LastName)
-	fmt.Fprintf(w, "The name is %s %s", foundUser.Name, foundUser.LastName)
+	var credentials cred
+	decoder := json.NewDecoder(r.Body)
+	// Read credentials from request body
+	err := decoder.Decode(&credentials)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Create bson document to filter in DB
+	filter := bson.D{{"username", credentials.Username}, {"password", credentials.Password}}
+	var loggedUser models.User
+	// Find user and password in database
+	err = controller.userDB.Get(filter, &loggedUser)
+	if err != nil {
+		w.WriteHeader(401)
+		// TODO: Change this to return a JSON object
+		fmt.Fprintf(w, "User or password incorrect")
+		return
+	}
+
+	token, err := auth.GenerateJWT(&loggedUser)
+	if err != nil {
+		w.WriteHeader(500)
+		// TODO: Change this to return a JSON object
+		fmt.Fprintf(w, "Error generating jwt")
+		return
+	}
+	type CustomResponse struct {
+		Token    string             `json:"token"`
+		Username string             `json:"username"`
+		UserID   primitive.ObjectID `json:"userId"`
+	}
+	// TODO: Place line below inside middleware
+	response := CustomResponse{
+		Token:    token,
+		Username: loggedUser.Username,
+		UserID:   loggedUser.ID,
+	}
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
 }
 
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
-	r.HandleFunc("/Login", controller.Login).Methods(http.MethodGet)
+	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
 }
 
 func SetUserController(r *mux.Router, db *mongo.Database) {
