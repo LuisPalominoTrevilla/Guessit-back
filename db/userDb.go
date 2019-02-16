@@ -12,7 +12,7 @@ type UserDB struct {
 	Users *mongo.Collection
 }
 
-func (db *UserDB) GetByID(filter bson.D, result *models.User) error {
+func (db *UserDB) Get(filter bson.D, result *models.User) error {
 	return db.Users.FindOne(context.TODO(), filter).Decode(&result)
 }
 

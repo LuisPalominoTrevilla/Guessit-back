@@ -8,5 +8,5 @@ import (
 
 type Controller interface {
 	Get(http.ResponseWriter, *http.Request)
-	initializeController(*mux.Router)
+	InitializeController(*mux.Router)
 }

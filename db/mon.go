@@ -19,8 +19,6 @@ type Database interface {
 	Insert(Model)
 }
 
-var db *mongo.Database
-
 func InitDb() *mongo.Database {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(ctx, "mongodb://mongodb:27017")
@@ -33,6 +31,5 @@ func InitDb() *mongo.Database {
 		log.Fatal("Couldnt find a server ", err)
 	}
 	fmt.Println("Connected to MongoDB!")
-	db = client.Database("guessit")
-	return db
+	return client.Database("guessit")
 }

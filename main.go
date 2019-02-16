@@ -20,6 +20,6 @@ func main() {
 	database := db.InitDb()
 	seeder.SeedModels(database)
 
-	r := routers.GetRouter()
+	r := routers.GetRouter(database)
 	http.ListenAndServe(":5000", r)
 }

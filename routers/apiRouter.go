@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/controllers"
+	"github.com/mongodb/mongo-go-driver/mongo"
 
 	"github.com/gorilla/mux"
 )
@@ -13,10 +14,10 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "API is alive")
 }
 
-func SetAPIRouter(r *mux.Router) {
+func SetAPIRouter(r *mux.Router, db *mongo.Database) {
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("", handleAPI).Methods("GET")
+	apiRouter.StrictSlash(true)
 	apiRouter.HandleFunc("/", handleAPI).Methods("GET")
 	userRouter := apiRouter.PathPrefix("/User").Subrouter()
-	controllers.SetController(userRouter)
+	controllers.SetUserController(userRouter, db)
 }
