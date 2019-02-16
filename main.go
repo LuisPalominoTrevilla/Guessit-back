@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
+	"github.com/LuisPalominoTrevilla/Guessit-back/routers"
 )
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
@@ -14,8 +14,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println(os.Getenv("SECRET_JWT_KEY"))
-	r := mux.NewRouter()
-	r.HandleFunc("/api", apiHandler)
-	http.Handle("/", r)
-	http.ListenAndServe(":5000", nil)
+
+	r := routers.GetRouter()
+	http.ListenAndServe(":5000", r)
 }
