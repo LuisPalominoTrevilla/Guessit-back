@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/LuisPalominoTrevilla/Guessit-back/boot/seeder"
+	"github.com/LuisPalominoTrevilla/Guessit-back/db"
 	"github.com/LuisPalominoTrevilla/Guessit-back/routers"
 )
 
@@ -14,6 +16,9 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	fmt.Println(os.Getenv("SECRET_JWT_KEY"))
+
+	database := db.InitDb()
+	seeder.SeedModels(database)
 
 	r := routers.GetRouter()
 	http.ListenAndServe(":5000", r)
