@@ -24,7 +24,7 @@ func seedUser(userDB db.UserDB, user models.User) error {
 		}
 		fmt.Println("Added user", user.Name, user.LastName, "to database", res.InsertedID)
 	} else if err == nil {
-		fmt.Println("Seed user already created")
+		fmt.Println("Seed user already created with id ", foundUser.ID)
 	} else {
 		return err
 	}
