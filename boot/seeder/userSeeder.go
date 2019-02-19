@@ -35,7 +35,9 @@ func seedUsers(userDB db.UserDB) {
 	luis := models.User{
 		Name:     "Luis",
 		Username: "luispalominot",
+		Image:    "http://gotaroja.com/palomino.png",
 		Email:    "luispalominot@hotmail.com",
+		Gender:   "male",
 		LastName: "Palomino",
 		Password: "palomitas123",
 		Age:      21,
@@ -43,15 +45,19 @@ func seedUsers(userDB db.UserDB) {
 	pietra := models.User{
 		Name:     "Jorge",
 		Username: "jorgePs",
+		Image:    "http://gotaroja.com/pietra.jpeg",
 		Email:    "jorgeps@gmail.com",
+		Gender:   "male",
 		LastName: "Pietra Santa",
 		Password: "linux123",
 		Age:      20,
 	}
 	dafne := models.User{
 		Name:     "Dafne",
-		Username: "daphnesabrina1",
-		Email:    "daphnesabrina@gmail.com",
+		Username: "dafnesabrina1",
+		Image:    "http://gotaroja.com/dafne.jpeg",
+		Email:    "dafnesabrina@gmail.com",
+		Gender:   "female",
 		LastName: "Medina",
 		Password: "diego",
 		Age:      22,

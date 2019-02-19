@@ -9,6 +9,7 @@ import (
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
 
+	"github.com/LuisPalominoTrevilla/Guessit-back/errors"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -17,14 +18,12 @@ func GenerateJWT(user *models.User) (string, error) {
 	signInKey := []byte(os.Getenv("SECRET_JWT_KEY"))
 
 	type CustomClaims struct {
-		UserID   primitive.ObjectID `json:"userId"`
-		Username string             `json:"username"`
+		UserID primitive.ObjectID `json:"userId"`
 		jwt.StandardClaims
 	}
 
 	claims := CustomClaims{
 		user.ID,
-		user.Username,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
 			Issuer:    "GuessIt",
@@ -40,4 +39,19 @@ func GenerateJWT(user *models.User) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+// VerifyJWT verifies jwt and sends back claims (user_id) or error
+func VerifyJWT(token string) (string, error) {
+	claims := jwt.MapClaims{}
+	parsedToken, err := jwt.ParseWithClaims(token, claims, func(tk *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_JWT_KEY")), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if parsedToken.Valid {
+		return claims["userId"].(string), nil
+	}
+	return "", errors.New("Token not valid")
 }
