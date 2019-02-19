@@ -8,14 +8,17 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// UserDB serves as the wrapper for the users colelction
 type UserDB struct {
 	Users *mongo.Collection
 }
 
-func (db *UserDB) GetByID(filter bson.D, result *models.User) error {
+// Get implements the findOne action in a model
+func (db *UserDB) Get(filter bson.D, result *models.User) error {
 	return db.Users.FindOne(context.TODO(), filter).Decode(&result)
 }
 
+// Insert implements the InsertOne action in a model
 func (db *UserDB) Insert(user models.User) (*mongo.InsertOneResult, error) {
 	return db.Users.InsertOne(context.TODO(), user)
 }

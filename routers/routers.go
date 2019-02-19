@@ -2,10 +2,12 @@ package routers
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
-func GetRouter() *mux.Router {
+// GetRouter receives a database and returns the application router
+func GetRouter(db *mongo.Database) *mux.Router {
 	r := mux.NewRouter()
-	SetAPIRouter(r)
+	SetAPIRouter(r, db)
 	return r
 }
