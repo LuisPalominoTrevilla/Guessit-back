@@ -76,10 +76,48 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	encoder.Encode(response)
 }
 
+// PersonalData returns personal data from the user
+func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("uid")
+	type CustomResponse struct {
+		Name     string `json:"name"`
+		Username string `json:"username"`
+		Image    string `json:"image"`
+		Email    string `json:"email"`
+		LastName string `json:"lastName"`
+		Gender   string `json:"gender"`
+		Age      int    `json:"age"`
+	}
+	// Create bson document to filter in DB
+	oid, _ := primitive.ObjectIDFromHex(userID)
+	filter := bson.D{{"_id", oid}}
+	var user models.User
+	err := controller.userDB.Get(filter, &user)
+	if err != nil {
+		w.WriteHeader(401)
+		// TODO: Change this to return a JSON object
+		fmt.Fprintf(w, "Error while getting user")
+		return
+	}
+	response := CustomResponse{
+		user.Name,
+		user.Username,
+		user.Image,
+		user.Email,
+		user.LastName,
+		user.Gender,
+		user.Age,
+	}
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
+}
+
 // InitializeController initializes the routes
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
+	r.Handle("/PersonalData", auth.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
