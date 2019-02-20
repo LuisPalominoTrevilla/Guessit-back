@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
@@ -39,7 +38,9 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	// Read credentials from request body
 	err := decoder.Decode(&credentials)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("NO BODY PRESENT")
+		w.WriteHeader(400)
+		return
 	}
 	// Create bson document to filter in DB
 	filter := bson.D{{"username", credentials.Username}, {"password", credentials.Password}}
