@@ -16,5 +16,6 @@ func GetRouter(db *mongo.Database) *mux.Router {
 	})
 	r.Use(middleware.Cors)
 	SetAPIRouter(r, db)
+	SetImagesRouter(r)
 	return r
 }
