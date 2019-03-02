@@ -1,5 +1,10 @@
 version: '3'
 services:
+  redis:
+    image: 'redis'
+    container_name: "guessit-redis"
+    ports:
+      - "6379:6379"
   mongodb:
     image: 'mongo'
     container_name: "guessit-mongo"
@@ -12,6 +17,7 @@ services:
     container_name: "guessit-backend"
     links:
       - mongodb
+      - redis
     volumes:
       - .:/src
       - ./static:/static
