@@ -1,0 +1,72 @@
+<html>
+    <head>
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+            <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="row">
+            <div class="col-12 flex-container">
+                <div class="sideNav">
+                    <div class="image">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="image">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    
+                </div>
+                <div class="rest">
+                    <div class="users-container text-center">
+                            {{range .}}
+                        <div class="card" style="width: 18rem;">
+                            <img src="{{.Image}}" class="card-img-top h-3" >
+                            <div class="card-body">
+                                <h5 class="card-title">Usuario {{.Username}}</h5>
+                                <p class="card-text">Nombre {{.Name}}</p>
+                                <p class="card-text">Apellido {{.LastName}}</p>
+                                <p class="card-text">Edad {{.Age}}</p>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <style>
+            .flex-container {
+                display: -webkit-flex;
+                display: flex;
+                height: 100%;
+            }
+            .sideNav{
+                background-color: rgba(7, 68, 160, 0.767);
+                height: 100vh;
+                -webkit-flex: 1;
+                flex: 1;
+            }
+            .rest{
+                -webkit-flex: 20;
+                flex: 20;
+            }
+            .image{
+                height: 80px;
+                width: 100%;
+                text-align: center;
+                padding: 10px 0 10px 0;
+                cursor: pointer;
+            }
+            .image .fas {
+                font-size: 40px;
+                color: white;
+            }
+            .users-container {
+                padding-top: 3rem;
+            }
+            .card {
+                box-shadow: 6px 7px 10px rgb(207, 207, 207);
+                display: inline-block;
+            }
+        </style>
+    </body>
+</html>

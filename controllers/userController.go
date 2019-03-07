@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
@@ -115,11 +116,28 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 	encoder.Encode(response)
 }
 
+func (controller *UserController) ShowUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := controller.userDB.GetAll()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, elem := range users {
+		fmt.Println(elem.Name)
+	}
+
+	p, _ := template.ParseFiles("/static/basicTemplate.html")
+	p.Execute(w, users)
+}
+
 // InitializeController initializes the routes
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
 	r.Handle("/PersonalData", auth.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
+	r.HandleFunc("/ShowUsers", controller.ShowUsers).Methods(http.MethodGet)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
