@@ -27,13 +27,20 @@ func (controller *UserController) Get(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hola Mundo desde usuario")
 }
 
-// Login serves as the endpoint to loggin the user
+// Login godoc
+// @Summary Login
+// @Description login user to system
+// @ID user-login
+// @Accept  json
+// @Produce  json
+// @Param user body models.Credentials true "User credentials"
+// @Success 200 {object} models.AuthenticationResponse
+// @Failure 400 {string} Error message
+// @Failure 401 {string} Error message
+// @Failure 500 {string} Error message
+// @Router /User/Login [post]
 func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) {
-	type cred struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-	var credentials cred
+	var credentials models.Credentials
 	decoder := json.NewDecoder(r.Body)
 	// Read credentials from request body
 	err := decoder.Decode(&credentials)
@@ -61,34 +68,28 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprintf(w, "Error generating jwt")
 		return
 	}
-	type CustomResponse struct {
-		Token    string             `json:"token"`
-		Username string             `json:"username"`
-		UserID   primitive.ObjectID `json:"userId"`
-	}
 	// TODO: Place line below inside middleware
-	response := CustomResponse{
-		Token:    token,
-		Username: loggedUser.Username,
-		UserID:   loggedUser.ID,
+	response := models.AuthenticationResponse{
+		Token:  token,
+		UserID: loggedUser.ID,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.Encode(response)
 }
 
-// PersonalData returns personal data from the user
+// PersonalData godoc
+// @Summary PersonalData
+// @Description Retrieve personal data from user
+// @ID personal-data-retrieval
+// @Produce  json
+// @Security Bearer
+// @Success 200 {object} models.PersonalDataResponse
+// @Failure 401 {string} Error message
+// @Failure 500 {string} Error message
+// @Router /User/PersonalData [get]
 func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("uid")
-	type CustomResponse struct {
-		Name     string `json:"name"`
-		Username string `json:"username"`
-		Image    string `json:"image"`
-		Email    string `json:"email"`
-		LastName string `json:"lastName"`
-		Gender   string `json:"gender"`
-		Age      int    `json:"age"`
-	}
 	// Create bson document to filter in DB
 	oid, _ := primitive.ObjectIDFromHex(userID)
 	filter := bson.D{{"_id", oid}}
@@ -100,7 +101,7 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 		fmt.Fprintf(w, "Error while getting user")
 		return
 	}
-	response := CustomResponse{
+	response := models.PersonalDataResponse{
 		user.Name,
 		user.Username,
 		user.Image,

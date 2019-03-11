@@ -47,6 +47,36 @@ For db management it is recommended that you use [Robo3T](https://robomongo.org/
 ## Coding conventions
 ...
 
+## Endpoint documentation
+Yes pal, you need to document every endpoint you write so the development team knows how each endpoint works.
+
+We are using swaggo/swag, a tool that allows easy documentation of your code using Swagger UI
+
+#### Usage
+To use it follow these instructions:
+- You need to download swag `go get -u github.com/swaggo/swag/cmd/swag`
+- Whenever you change or add new documentation, run the following command inside the root folder of your app `swag init -g routers/apiRouter.go`
+- If there were no errors, just build the container again and run it
+- To view the documentation UI just enter *localhost:5000/swagger/index.html*
+- If you have questions about the Swagger UI, ask the repo owner
+
+#### Troubleshooting
+**What happens if the command swag is not found?**
+This means that you don't have GOPATH exported. If you are using Linux, or macOS, follow the next instructions:
+1. Run the command `go env` and look for the variables GOPATH and GOROOT, you will need them soon
+2. Edit your bash config file (~/.bash_profile for bash and ~/.zshrc for Zsh)
+3. Add the following lines somewhere in the file, replacing GOPATH and GOROOT with the previous output
+```
+export GOPATH=$HOME/go
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+```
+4. Run the command `source ~/.bash_profile` or `~/.zshrc` depending on your bash
+
+
+We encourage you to visit the [Swag docs](https://github.com/swaggo/swag#api-operation) so you have an idea about how to document your code.
+You may also check current endpoints so you can have an idea about how to document new endpoints.
+
 ## Development work
 Since you will be working with a team, it's important that you follow coding conventions and get used to the work flow.
 
