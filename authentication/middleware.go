@@ -20,6 +20,7 @@ func AccessControl(next http.HandlerFunc) http.Handler {
 				fmt.Fprintf(w, "Invalid token")
 			} else {
 				r.Header.Add("uid", userID)
+				r.Header.Add("token", auth[1])
 				next.ServeHTTP(w, r)
 			}
 		} else {

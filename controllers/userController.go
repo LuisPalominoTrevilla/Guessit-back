@@ -8,6 +8,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
+	"github.com/LuisPalominoTrevilla/Guessit-back/redis"
 
 	auth "github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -19,7 +20,8 @@ import (
 
 // UserController wraps the UserDB inside the controller
 type UserController struct {
-	userDB *database.UserDB
+	userDB      *database.UserDB
+	redisClient *redis.Client
 }
 
 // Get serves as a simple get request for the model User
@@ -78,6 +80,11 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	encoder.Encode(response)
 }
 
+func (controller *UserController) Logout(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Hello getting into logout endpoint")
+	controller.redisClient.SetArbitraryPair("blacklist:token", r.Header.Get("token"))
+}
+
 // PersonalData godoc
 // @Summary PersonalData
 // @Description Retrieve personal data from user
@@ -119,12 +126,13 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
+	r.Handle("/Logout", auth.AccessControl(controller.Logout)).Methods(http.MethodPost)
 	r.Handle("/PersonalData", auth.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
-func SetUserController(r *mux.Router, db *mongo.Database) {
+func SetUserController(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
 	user := database.UserDB{Users: db.Collection("users")}
-	userController := UserController{userDB: &user}
+	userController := UserController{userDB: &user, redisClient: redisClient}
 	userController.InitializeController(r)
 }

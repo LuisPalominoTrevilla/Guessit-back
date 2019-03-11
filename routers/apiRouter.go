@@ -7,6 +7,7 @@ import (
 	"github.com/LuisPalominoTrevilla/Guessit-back/controllers"
 	// Folder holding documentation
 	_ "github.com/LuisPalominoTrevilla/Guessit-back/docs"
+	"github.com/LuisPalominoTrevilla/Guessit-back/redis"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -35,12 +36,12 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 // SetAPIRouter sets the API router and its subRouters
-func SetAPIRouter(r *mux.Router, db *mongo.Database) {
+func SetAPIRouter(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
 	// Set swagger UI
 	r.HandleFunc("/swagger/{rest}", httpSwagger.WrapHandler)
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	apiRouter.StrictSlash(true)
 	apiRouter.HandleFunc("/", handleAPI).Methods("GET")
 	userRouter := apiRouter.PathPrefix("/User").Subrouter()
-	controllers.SetUserController(userRouter, db)
+	controllers.SetUserController(userRouter, db, redisClient)
 }
