@@ -9,9 +9,9 @@ You will need a .env file for the project to work. If you don't have one, ask th
 First, clone the project to your desired location with `git@github.com:LuisPalominoTrevilla/Guessit-back.git`
 
 ## Setup docker containers
-For the time being, GuessIt! runs via 2 docker containers.
+For the time being, GuessIt! runs via 3 docker containers.
 Make sure you have docker-compose installed with `docker-compose -v`. If you don't have it, please [install docker-compose](https://docs.docker.com/compose/install/)
-Build the images for the project, this should not take that long:
+Build the images for the project, it might take a while:
 ```
 $ docker-compose build
 ```
@@ -23,11 +23,13 @@ The web server should be running on port 5000 and you should have mongoDB runnin
 Run `docker ps` and you should see an output like the following:
 ```
 CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                      NAMES
-af6dea811c90        guessit-back_golang   "/app"                   8 hours ago         Up 4 seconds        0.0.0.0:5000->5000/tcp     guessit-backend
-6f137255e098        mongo                 "docker-entrypoint.s…"   9 hours ago         Up 4 seconds        0.0.0.0:27017->27017/tcp   guessit-mongo
+e0b82cc45f3c        guessit-back_golang   "/app"                   3 minutes ago       Up 3 minutes        0.0.0.0:5000->5000/tcp     guessit-backend
+bcf419b266f9        redis                 "docker-entrypoint.s…"   3 days ago          Up 3 minutes        0.0.0.0:6379->6379/tcp     guessit-redis
+6f137255e098        mongo                 "docker-entrypoint.s…"   3 weeks ago         Up 3 minutes        0.0.0.0:27017->27017/tcp   guessit-mongo
 ```
-Docker is currently running 2 containers.
+Docker is currently running 3 containers.
 - `guessit-backend`: API container.
+- `guessit-redis`: Redis Database for the project.
 - `guessit-mongo`: Container for the main database.
 You can stop your containers using `docker-compose stop` or, if you are not running your containers in the background, use `CTRL-C`
 
@@ -36,6 +38,11 @@ Whenever you make a change to a file, you need to rebuild the containers, it won
 ## Accessing containers
 If for any reason you need to access a container, use the following command:
 `$ docker exec -it *container-name* bash`
+
+If you want to access Redis CLI just use
+`$ docker exec -it guessit-redis bash`
+and then
+`$ redis-cli`
 
 ## DB Management
 For db management it is recommended that you use [Robo3T](https://robomongo.org/)
