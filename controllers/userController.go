@@ -34,7 +34,7 @@ func (controller *UserController) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login godoc
-// @Summary Login
+// @Summary Login to system
 // @Description login user to system
 // @ID user-login
 // @Accept  json
@@ -85,6 +85,14 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 }
 
 // Logout godoc
+// @Summary Logout user from system
+// @Description Logout user
+// @ID logout-endpoint
+// @Produce plain
+// @Security Bearer
+// @Success 200 {string} OK
+// @Failure 401 {string} Error message
+// @Router /User/Logout [post]
 func (controller *UserController) Logout(w http.ResponseWriter, r *http.Request) {
 	exp, err := strconv.ParseFloat(r.Header.Get("exp"), 64)
 	var expInt int64
@@ -101,7 +109,7 @@ func (controller *UserController) Logout(w http.ResponseWriter, r *http.Request)
 }
 
 // PersonalData godoc
-// @Summary PersonalData
+// @Summary Get personal data from a user
 // @Description Retrieve personal data from user
 // @ID personal-data-retrieval
 // @Produce  json

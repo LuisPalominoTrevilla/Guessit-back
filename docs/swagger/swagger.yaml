@@ -6,8 +6,6 @@ definitions:
         type: string
       userId:
         type: string
-      username:
-        type: string
     type: object
   models.Credentials:
     properties:
@@ -65,10 +63,6 @@ paths:
       responses:
         "200":
           description: OK
-          headers:
-            Bad:
-              description: OK
-              type: string
           schema:
             $ref: '#/definitions/models.AuthenticationResponse'
             type: object
@@ -76,15 +70,33 @@ paths:
           description: Bad Request
           schema:
             type: string
-        "404":
-          description: Not Found
+        "401":
+          description: Unauthorized
           schema:
             type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
-      summary: Login
+      summary: Login to system
+  /User/Logout:
+    post:
+      description: Logout user
+      operationId: logout-endpoint
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Logout user from system
   /User/PersonalData:
     get:
       description: Retrieve personal data from user
@@ -101,17 +113,13 @@ paths:
           description: Unauthorized
           schema:
             type: string
-        "404":
-          description: Not Found
-          schema:
-            type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
       security:
       - Bearer: []
-      summary: PersonalData
+      summary: Get personal data from a user
 securityDefinitions:
   Bearer:
     in: header
