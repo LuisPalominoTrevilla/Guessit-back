@@ -3,7 +3,10 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
@@ -20,8 +23,9 @@ import (
 
 // UserController wraps the UserDB inside the controller
 type UserController struct {
-	userDB      *database.UserDB
-	redisClient *redis.Client
+	userDB         *database.UserDB
+	redisClient    *redis.Client
+	authMiddleware *auth.Middleware
 }
 
 // Get serves as a simple get request for the model User
@@ -80,9 +84,20 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	encoder.Encode(response)
 }
 
+// Logout godoc
 func (controller *UserController) Logout(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Hello getting into logout endpoint")
-	controller.redisClient.SetArbitraryPair("blacklist:token", r.Header.Get("token"))
+	exp, err := strconv.ParseFloat(r.Header.Get("exp"), 64)
+	var expInt int64
+	if err != nil {
+		expInt = time.Now().Add(time.Hour * 72).Unix()
+	} else {
+		expInt = int64(exp)
+	}
+	err = controller.redisClient.SetExpArbitraryPair("blacklist:"+r.Header.Get("token"), expInt, "")
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Fprintf(w, "Logged out")
 }
 
 // PersonalData godoc
@@ -126,13 +141,19 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
-	r.Handle("/Logout", auth.AccessControl(controller.Logout)).Methods(http.MethodPost)
-	r.Handle("/PersonalData", auth.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
+	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
+	r.Handle("/PersonalData", controller.authMiddleware.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
 func SetUserController(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
 	user := database.UserDB{Users: db.Collection("users")}
-	userController := UserController{userDB: &user, redisClient: redisClient}
+	userController := UserController{
+		userDB:      &user,
+		redisClient: redisClient,
+		authMiddleware: &auth.Middleware{
+			RedisClient: redisClient,
+		},
+	}
 	userController.InitializeController(r)
 }
