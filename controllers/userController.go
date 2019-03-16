@@ -3,10 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -147,104 +145,12 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 	encoder.Encode(response)
 }
 
-func fileExists(fileName string) bool {
-	_, err := os.Stat(fileName)
-	return !os.IsNotExist(err)
-}
-
-// UploadImage godoc
-func (controller *UserController) UploadImage(w http.ResponseWriter, r *http.Request) {
-	var maxBytes int64 = 64 * 1024 * 1024
-
-	// Parse multipart form data
-	err := r.ParseMultipartForm(maxBytes)
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprint(w, "Error parsing multiform data")
-		return
-	}
-
-	// Ensure that both the image and age are contained in multipartform
-	if len(r.MultipartForm.File["image"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing image")
-		return
-	}
-	if len(r.MultipartForm.Value["age"]) == 0 {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing age")
-		return
-	}
-	// get userId from header
-	userID := r.Header.Get("uid")
-
-	// get age from image
-	age, err := strconv.Atoi(r.MultipartForm.Value["age"][0])
-	if err != nil {
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Age is not a number")
-		return
-	}
-	fmt.Println(age)
-
-	// get image file header
-	imFileHeader := r.MultipartForm.File["image"][0]
-	im, err := imFileHeader.Open()
-	defer im.Close()
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprint(w, "Error opening image file")
-		return
-	}
-
-	imageURL := "/" + userID
-
-	// ensure dir exists and create final file
-	os.MkdirAll("/static"+imageURL, os.ModePerm)
-	imageURL += "/"
-	filename := imFileHeader.Filename
-
-	additionalNum := ""
-	for fileExists("/static" + imageURL + additionalNum + filename) {
-		if additionalNum == "" {
-			additionalNum = "1"
-		} else {
-			num, _ := strconv.Atoi(additionalNum)
-			num++
-			additionalNum = strconv.Itoa(num)
-		}
-	}
-	imageURL += additionalNum + filename
-
-	file, err := os.Create("/static" + imageURL)
-	defer file.Close()
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprint(w, "Error creating file")
-		return
-	}
-
-	// write image file to dir
-	_, err = io.Copy(file, im)
-	if err != nil {
-		println(err.Error())
-		w.WriteHeader(500)
-		fmt.Fprint(w, "Error copying image file")
-		return
-	}
-
-	imageURL = "/images" + imageURL
-
-	fmt.Fprint(w, imageURL)
-}
-
 // InitializeController initializes the routes
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
 	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
 	r.Handle("/PersonalData", controller.authMiddleware.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
-	r.Handle("/UploadImage", controller.authMiddleware.AccessControl(controller.UploadImage)).Methods(http.MethodPost)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
