@@ -32,6 +32,19 @@ func fileExists(fileName string) bool {
 }
 
 // UploadImage godoc
+// @Summary Let a user upload images
+// @Description Upload an image
+// @ID upload-image-endpoint
+// @Accept mpfd
+// @Produce plain
+// @Param image formData file true "Image to be uploaded"
+// @Param age formData string true "Age that corresponts to the person in the image"
+// @Security Bearer
+// @Success 200 {string} OK
+// @Failure 400 {string} Bad request
+// @Failure 401 {string} Authentication error
+// @Failure 500 {string} Server error
+// @Router /Image/UploadImage [post]
 func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Request) {
 	var maxBytes int64 = 64 * 1024 * 1024
 

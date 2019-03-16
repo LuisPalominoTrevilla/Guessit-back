@@ -44,6 +44,45 @@ info:
   title: GuessIt API
   version: "0.1"
 paths:
+  /Image/UploadImage:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an image
+      operationId: upload-image-endpoint
+      parameters:
+      - description: Image to be uploaded
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Age that corresponts to the person in the image
+        in: formData
+        name: age
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Let a user upload images
   /User/Login:
     post:
       consumes:
