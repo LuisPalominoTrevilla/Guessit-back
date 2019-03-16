@@ -10,5 +10,6 @@ import (
 func SetImagesRouter(r *mux.Router) {
 	fs := http.FileServer(http.Dir("static"))
 	imagesRouter := r.PathPrefix("/images").Subrouter()
-	imagesRouter.Handle("/{rest}", http.StripPrefix("/images", fs))
+	imagesRouter.Handle("/{image}", http.StripPrefix("/images", fs))
+	imagesRouter.Handle("/{directory}/{image}", http.StripPrefix("/images", fs))
 }
