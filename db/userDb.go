@@ -24,6 +24,7 @@ func (db *UserDB) Insert(user models.User) (*mongo.InsertOneResult, error) {
 	return db.Users.InsertOne(context.TODO(), user)
 }
 
+// RegisterUser enables te capability to create a new user
 func (db *UserDB) RegisterUser(name string, lastname string, gender string, email string, username string, password string) error {
 	filter := bson.D{{"email", email}}
 
@@ -49,7 +50,7 @@ func (db *UserDB) RegisterUser(name string, lastname string, gender string, emai
 		}
 		fmt.Println("Added user", name, lastname, "to database", res.InsertedID)
 	} else if err == nil {
-		fmt.Println("Seed user already created with id ", foundUser.ID)
+		fmt.Println("User already created with id ", foundUser.ID)
 	} else {
 		return err
 	}
