@@ -35,5 +35,5 @@ func InitDb() *mongo.Database {
 		log.Fatal("Couldnt find a server ", err)
 	}
 	fmt.Println("Connected to MongoDB!")
-	return client.Database("guessit")
+	return client.Database(os.Getenv("MONGO_DB"))
 }
