@@ -18,6 +18,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	fmt.Println("Loaded .env successfully")
 	database := db.InitDb()
 	seeder.SeedModels(database)
 
