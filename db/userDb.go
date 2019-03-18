@@ -24,33 +24,22 @@ func (db *UserDB) Insert(user models.User) (*mongo.InsertOneResult, error) {
 	return db.Users.InsertOne(context.TODO(), user)
 }
 
-// RegisterUser enables te capability to create a new user
-func (db *UserDB) RegisterUser(name string, lastname string, gender string, email string, username string, password string) error {
-	filter := bson.D{{"email", email}}
+// Create enables the capability to create a new user
+func (db *UserDB) Create(user models.User, filter bson.D) error {
 
-	userToRegister := models.User{
-		Name:     name,
-		Username: username,
-		Image:    "",
-		Email:    email,
-		Gender:   gender,
-		LastName: lastname,
-		Password: password,
-		Age:      21,
-	}
-	fmt.Println("Trying to find user", name, lastname, "in db")
+	fmt.Println("Verifying if email", user.Email, "is not in db")
 
 	var foundUser models.User
 	err := db.Get(filter, &foundUser)
 
 	if err == mongo.ErrNoDocuments {
-		res, err := db.Insert(userToRegister)
+		res, err := db.Insert(user)
 		if err != nil {
 			return err
 		}
-		fmt.Println("Added user", name, lastname, "to database", res.InsertedID)
+		fmt.Println("Added user", user.Name, user.LastName, "to database", res.InsertedID)
 	} else if err == nil {
-		fmt.Println("User already created with id ", foundUser.ID)
+		fmt.Println("User already created with email ", foundUser.Email)
 	} else {
 		return err
 	}
