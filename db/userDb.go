@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
@@ -40,6 +41,7 @@ func (db *UserDB) Create(user models.User, filter bson.D) error {
 		fmt.Println("Added user", user.Name, user.LastName, "to database", res.InsertedID)
 	} else if err == nil {
 		fmt.Println("User already created with email ", foundUser.Email)
+		return errors.New("User already exists")
 	} else {
 		return err
 	}
