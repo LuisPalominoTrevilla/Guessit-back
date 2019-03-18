@@ -120,6 +120,7 @@ func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
 	r.Handle("/PersonalData", auth.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
+	r.HandleFunc("/Register", controller.Register).Methods(http.MethodPost)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
