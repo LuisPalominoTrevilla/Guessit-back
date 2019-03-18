@@ -2,15 +2,21 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/boot/seeder"
 	"github.com/LuisPalominoTrevilla/Guessit-back/db"
 	"github.com/LuisPalominoTrevilla/Guessit-back/redis"
 	"github.com/LuisPalominoTrevilla/Guessit-back/routers"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	database := db.InitDb()
 	seeder.SeedModels(database)
