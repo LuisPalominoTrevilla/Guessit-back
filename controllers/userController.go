@@ -137,6 +137,10 @@ func SetUserController(r *mux.Router, db *mongo.Database) {
 // @Accept  json
 // @Produce  json
 // @Param user body models.User true "User"
+// @Success 200 {string} success message
+// @Failure 400 {string} error message
+// @Failure 401 {string} error message
+// @Failure 500 {string} error message
 func (controller *UserController) Register(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	decoder := json.NewDecoder(r.Body)
@@ -162,5 +166,19 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 		Age:      user.Age,
 	}
 
-	controller.userDB.Create(userToRegister, filter)
+	cErr := controller.userDB.Create(userToRegister, filter)
+
+	if cErr != nil {
+		if cErr.Error() == "User already exists" {
+			w.WriteHeader(401)
+			//TODO: Change this to return a JSON object
+			fmt.Println("USER WITH SAID EMAIL ALREADY EXISTS")
+			return
+		}
+		w.WriteHeader(500)
+		// TODO: Change this to return a JSON object
+		fmt.Fprintf(w, "Error creating new user")
+		return
+	}
+
 }
