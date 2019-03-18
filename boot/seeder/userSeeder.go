@@ -74,4 +74,14 @@ func seedUsers(userDB db.UserDB) {
 	if err != nil {
 		log.Fatal("User could not be instantiated")
 	}
+
+	err = userDB.RegisterUser("Juan", "Ayala", "male", "juanayala97@hotmail.com", "JuanAyala02", "arantza")
+	if err != nil {
+		log.Fatal("User could not be instantiated")
+	}
+
+	err = userDB.RegisterUser("Rafa", "Flores", "male", "rafa_flores97@hotmail.com", "Von Plus Ultra", "AnaMass")
+	if err != nil {
+		log.Fatal("User could not be instantiated")
+	}
 }
