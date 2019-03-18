@@ -128,3 +128,38 @@ func SetUserController(r *mux.Router, db *mongo.Database) {
 	userController := UserController{userDB: &user}
 	userController.InitializeController(r)
 }
+
+// Register godoc
+// @Summary Register
+// @Description Register new user to the database
+// @ID user-register
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "User"
+func (controller *UserController) Register(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	decoder := json.NewDecoder(r.Body)
+
+	// Read credentials from request body
+	err := decoder.Decode(&user)
+	if err != nil {
+		fmt.Println("NO BODY PRESENT")
+		w.WriteHeader(400)
+		return
+	}
+	// Create bson document to filter in DB
+	filter := bson.D{{"email", user.Email}}
+
+	userToRegister := models.User{
+		Name:     user.Name,
+		Username: user.Username,
+		Image:    user.Image,
+		Email:    user.Email,
+		Gender:   user.Gender,
+		LastName: user.LastName,
+		Password: user.Password,
+		Age:      user.Age,
+	}
+
+	controller.userDB.Create(userToRegister, filter)
+}
