@@ -42,6 +42,10 @@ func SetAPIRouter(r *mux.Router, db *mongo.Database, redisClient *redis.Client) 
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	apiRouter.StrictSlash(true)
 	apiRouter.HandleFunc("/", handleAPI).Methods("GET")
+
 	userRouter := apiRouter.PathPrefix("/User").Subrouter()
 	controllers.SetUserController(userRouter, db, redisClient)
+
+	imageRouter := apiRouter.PathPrefix("/Image").Subrouter()
+	controllers.SetImageController(imageRouter, db, redisClient)
 }
