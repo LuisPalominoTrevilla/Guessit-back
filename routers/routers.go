@@ -17,6 +17,6 @@ func GetRouter(db *mongo.Database, redisClient *redis.Client) *mux.Router {
 	})
 	r.Use(middleware.Cors)
 	SetAPIRouter(r, db, redisClient)
-	SetImagesRouter(r)
+	SetStaticRouter(r)
 	return r
 }
