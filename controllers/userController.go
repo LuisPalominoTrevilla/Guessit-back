@@ -3,11 +3,15 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
+	"github.com/LuisPalominoTrevilla/Guessit-back/redis"
 
 	auth "github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -19,7 +23,9 @@ import (
 
 // UserController wraps the UserDB inside the controller
 type UserController struct {
-	userDB *database.UserDB
+	userDB         *database.UserDB
+	redisClient    *redis.Client
+	authMiddleware *auth.Middleware
 }
 
 // Get serves as a simple get request for the model User
@@ -28,7 +34,7 @@ func (controller *UserController) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login godoc
-// @Summary Login
+// @Summary Login to system
 // @Description login user to system
 // @ID user-login
 // @Accept  json
@@ -78,8 +84,32 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	encoder.Encode(response)
 }
 
+// Logout godoc
+// @Summary Logout user from system
+// @Description Logout user
+// @ID logout-endpoint
+// @Produce plain
+// @Security Bearer
+// @Success 200 {string} OK
+// @Failure 401 {string} Error message
+// @Router /User/Logout [post]
+func (controller *UserController) Logout(w http.ResponseWriter, r *http.Request) {
+	exp, err := strconv.ParseFloat(r.Header.Get("exp"), 64)
+	var expInt int64
+	if err != nil {
+		expInt = time.Now().Add(time.Hour * 72).Unix()
+	} else {
+		expInt = int64(exp)
+	}
+	err = controller.redisClient.SetExpArbitraryPair("blacklist:"+r.Header.Get("token"), expInt, "")
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Fprintf(w, "Logged out")
+}
+
 // PersonalData godoc
-// @Summary PersonalData
+// @Summary Get personal data from a user
 // @Description Retrieve personal data from user
 // @ID personal-data-retrieval
 // @Produce  json
@@ -119,12 +149,19 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
-	r.Handle("/PersonalData", auth.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
+	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
+	r.Handle("/PersonalData", controller.authMiddleware.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
-func SetUserController(r *mux.Router, db *mongo.Database) {
+func SetUserController(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
 	user := database.UserDB{Users: db.Collection("users")}
-	userController := UserController{userDB: &user}
+	userController := UserController{
+		userDB:      &user,
+		redisClient: redisClient,
+		authMiddleware: &auth.Middleware{
+			RedisClient: redisClient,
+		},
+	}
 	userController.InitializeController(r)
 }

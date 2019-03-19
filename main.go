@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/boot/seeder"
@@ -17,10 +16,7 @@ func main() {
 
 	// TODO: Remove the next four lines and pass the client to the routers
 	redisClient := redis.InitRedis()
-	redisClient.SetArbitraryPair("lastname", "palomino")
-	res, _ := redisClient.GetStringValue("lastname")
-	fmt.Println(res)
 
-	r := routers.GetRouter(database)
+	r := routers.GetRouter(database, redisClient)
 	http.ListenAndServe(":5000", r)
 }

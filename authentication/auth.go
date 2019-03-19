@@ -42,16 +42,16 @@ func GenerateJWT(user *models.User) (string, error) {
 }
 
 // VerifyJWT verifies jwt and sends back claims (user_id) or error
-func VerifyJWT(token string) (string, error) {
+func VerifyJWT(token string) (jwt.MapClaims, error) {
 	claims := jwt.MapClaims{}
 	parsedToken, err := jwt.ParseWithClaims(token, claims, func(tk *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("SECRET_JWT_KEY")), nil
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if parsedToken.Valid {
-		return claims["userId"].(string), nil
+		return claims, nil
 	}
-	return "", errors.New("Token not valid")
+	return nil, errors.New("Token not valid")
 }
