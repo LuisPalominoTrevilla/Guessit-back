@@ -28,8 +28,6 @@ func (db *UserDB) Insert(user models.User) (*mongo.InsertOneResult, error) {
 // Create enables the capability to create a new user
 func (db *UserDB) Create(user models.User, filter bson.D) error {
 
-	fmt.Println("Verifying if email", user.Email, "is not in db")
-
 	var foundUser models.User
 	err := db.Get(filter, &foundUser)
 
@@ -40,8 +38,8 @@ func (db *UserDB) Create(user models.User, filter bson.D) error {
 		}
 		fmt.Println("Added user", user.Name, user.LastName, "to database", res.InsertedID)
 	} else if err == nil {
-		fmt.Println("User already created with email ", foundUser.Email)
-		return errors.New("User already exists")
+		fmt.Println("Resource already exists", foundUser.Email, foundUser.Username)
+		return errors.New("Resource already exists")
 	} else {
 		return err
 	}

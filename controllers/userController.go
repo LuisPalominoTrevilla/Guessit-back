@@ -151,7 +151,7 @@ func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
 	r.Handle("/PersonalData", controller.authMiddleware.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
 	r.HandleFunc("/Register", controller.Register).Methods(http.MethodPost)
-  	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
+	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
@@ -176,7 +176,7 @@ func SetUserController(r *mux.Router, db *mongo.Database, redisClient *redis.Cli
 // @Param user body models.User true "User"
 // @Success 200 {string} success message
 // @Failure 400 {string} error message
-// @Failure 401 {string} error message
+// @Failure 409 {string} error message
 // @Failure 500 {string} error message
 func (controller *UserController) Register(w http.ResponseWriter, r *http.Request) {
 	var user models.User
@@ -187,10 +187,30 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		fmt.Println("NO BODY PRESENT")
 		w.WriteHeader(400)
+		w.Write([]byte("No body present"))
 		return
 	}
 	// Create bson document to filter in DB
-	filter := bson.D{{"email", user.Email}}
+	filter1 := bson.D{{"email", user.Email}}
+
+	var existing models.User
+	cErr := controller.userDB.Get(filter1, &existing)
+
+	if cErr == nil {
+		w.WriteHeader(409)
+		w.Write([]byte("This email is already being used"))
+		return
+	}
+
+	filter2 := bson.D{{"username", user.Username}}
+
+	cErr2 := controller.userDB.Get(filter2, &existing)
+
+	if cErr2 == nil {
+		w.WriteHeader(409)
+		w.Write([]byte("This username has already been taken"))
+		return
+	}
 
 	userToRegister := models.User{
 		Name:     user.Name,
@@ -203,18 +223,12 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 		Age:      user.Age,
 	}
 
-	cErr := controller.userDB.Create(userToRegister, filter)
+	cErr3 := controller.userDB.Create(userToRegister, filter1)
 
-	if cErr != nil {
-		if cErr.Error() == "User already exists" {
-			w.WriteHeader(401)
-			//TODO: Change this to return a JSON object
-			fmt.Println("USER WITH SAID EMAIL ALREADY EXISTS")
-			return
-		}
-		w.WriteHeader(500)
-		// TODO: Change this to return a JSON object
-		fmt.Fprintf(w, "Error creating new user")
+	if cErr3 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("We're having some issues, please try again later"))
+
 		return
 	}
 
