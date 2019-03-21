@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	auth "github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 	database "github.com/LuisPalominoTrevilla/Guessit-back/db"
@@ -47,6 +48,10 @@ func fileExists(fileName string) bool {
 // @Router /Image/UploadImage [post]
 func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Request) {
 	var maxBytes int64 = 64 * 1024 * 1024
+	validImageFormats := map[string]bool{
+		"image/png":  true,
+		"image/jpeg": true,
+	}
 
 	// Parse multipart form data
 	err := r.ParseMultipartForm(maxBytes)
@@ -89,12 +94,19 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	if _, exists := validImageFormats[imFileHeader.Header["Content-Type"][0]]; !exists {
+		w.WriteHeader(400)
+		fmt.Fprint(w, "File uploaded does not have a valid image format")
+		return
+	}
+
 	imageURL := "/" + userID
 
 	// ensure dir exists and create final file
 	os.MkdirAll("/static"+imageURL, os.ModePerm)
 	imageURL += "/"
 	filename := imFileHeader.Filename
+	filename = strings.Replace(filename, " ", "", -1)
 
 	additionalNum := ""
 	for fileExists("/static" + imageURL + additionalNum + filename) {
