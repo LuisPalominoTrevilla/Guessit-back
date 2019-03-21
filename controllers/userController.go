@@ -223,7 +223,7 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 		Age:      user.Age,
 	}
 
-	cErr3 := controller.userDB.Create(userToRegister, filter1)
+	_, cErr3 := controller.userDB.Insert(userToRegister)
 
 	if cErr3 != nil {
 		w.WriteHeader(http.StatusInternalServerError)

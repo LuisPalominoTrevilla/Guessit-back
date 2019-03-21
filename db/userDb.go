@@ -2,8 +2,6 @@ package db
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -23,25 +21,4 @@ func (db *UserDB) Get(filter bson.D, result *models.User) error {
 // Insert implements the InsertOne action in a model
 func (db *UserDB) Insert(user models.User) (*mongo.InsertOneResult, error) {
 	return db.Users.InsertOne(context.TODO(), user)
-}
-
-// Create enables the capability to create a new user
-func (db *UserDB) Create(user models.User, filter bson.D) error {
-
-	var foundUser models.User
-	err := db.Get(filter, &foundUser)
-
-	if err == mongo.ErrNoDocuments {
-		res, err := db.Insert(user)
-		if err != nil {
-			return err
-		}
-		fmt.Println("Added user", user.Name, user.LastName, "to database", res.InsertedID)
-	} else if err == nil {
-		fmt.Println("Resource already exists", foundUser.Email, foundUser.Username)
-		return errors.New("Resource already exists")
-	} else {
-		return err
-	}
-	return nil
 }
