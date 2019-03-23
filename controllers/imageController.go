@@ -8,16 +8,19 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/LuisPalominoTrevilla/Guessit-back/models"
+
 	auth "github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 	database "github.com/LuisPalominoTrevilla/Guessit-back/db"
 	"github.com/LuisPalominoTrevilla/Guessit-back/redis"
 	"github.com/gorilla/mux"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
-// ImageController wraps the UserDB inside the controller
+// ImageController wraps the ImageDB inside the controller
 type ImageController struct {
-	imageDB        *database.UserDB
+	imageDB        *database.ImageDB
 	redisClient    *redis.Client
 	authMiddleware *auth.Middleware
 }
@@ -83,7 +86,6 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		fmt.Fprint(w, "Age is not a number")
 		return
 	}
-	fmt.Println(age)
 
 	// get image file header
 	imFileHeader := r.MultipartForm.File["image"][0]
@@ -144,7 +146,22 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	imageURL = "/images" + imageURL
+	oid, _ := primitive.ObjectIDFromHex(userID)
+
+	image := models.Image{
+		URL:   "/images" + imageURL,
+		Age:   age,
+		Owner: oid,
+	}
+
+	_, err = controller.imageDB.Insert(image)
+
+	if err != nil {
+		println(err.Error())
+		w.WriteHeader(500)
+		fmt.Fprint(w, "Error trying to insert image into db")
+		return
+	}
 
 	fmt.Fprint(w, imageURL)
 }
@@ -158,7 +175,9 @@ func (controller *ImageController) InitializeController(r *mux.Router) {
 
 // SetImageController creates the ImageController and wraps the user collection into ImageDB
 func SetImageController(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
+	image := database.ImageDB{Images: db.Collection("images")}
 	ImageController := ImageController{
+		imageDB:     &image,
 		redisClient: redisClient,
 		authMiddleware: &auth.Middleware{
 			RedisClient: redisClient,
