@@ -168,7 +168,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	fmt.Fprint(w, imageURL)
+	fmt.Fprint(w, "/images"+imageURL)
 }
 
 // InitializeController initializes the routes
