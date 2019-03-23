@@ -44,6 +44,7 @@ func fileExists(fileName string) bool {
 // @Success 200 {string} OK
 // @Failure 400 {string} Bad request
 // @Failure 401 {string} Authentication error
+// @Failure 413 {string} File too large
 // @Failure 500 {string} Server error
 // @Router /Image/UploadImage [post]
 func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Request) {
@@ -97,6 +98,12 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	if _, exists := validImageFormats[imFileHeader.Header["Content-Type"][0]]; !exists {
 		w.WriteHeader(400)
 		fmt.Fprint(w, "File uploaded does not have a valid image format")
+		return
+	}
+
+	if imFileHeader.Size/1000000 > 5 {
+		w.WriteHeader(413)
+		fmt.Fprint(w, "Image uploaded is more than 5 MB")
 		return
 	}
 
