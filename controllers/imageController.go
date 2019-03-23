@@ -60,6 +60,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	// Parse multipart form data
 	err := r.ParseMultipartForm(maxBytes)
 	if err != nil {
+		println(err.Error())
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error parsing multiform data")
 		return
@@ -82,6 +83,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	// get age from image
 	age, err := strconv.Atoi(r.MultipartForm.Value["age"][0])
 	if err != nil {
+		println(err.Error())
 		w.WriteHeader(400)
 		fmt.Fprint(w, "Age is not a number")
 		return
@@ -92,6 +94,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	im, err := imFileHeader.Open()
 	defer im.Close()
 	if err != nil {
+		println(err.Error())
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error opening image file")
 		return
@@ -132,6 +135,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	file, err := os.Create("/static" + imageURL)
 	defer file.Close()
 	if err != nil {
+		println(err.Error())
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error creating file")
 		return
