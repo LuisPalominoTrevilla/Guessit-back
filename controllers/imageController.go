@@ -158,6 +158,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 
 	if err != nil {
 		println(err.Error())
+		_ = os.Remove(("/static" + imageURL))
 		w.WriteHeader(500)
 		fmt.Fprint(w, "Error trying to insert image into db")
 		return
