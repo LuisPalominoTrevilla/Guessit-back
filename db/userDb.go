@@ -13,8 +13,8 @@ type UserDB struct {
 	Users *mongo.Collection
 }
 
-// Get implements the findOne action in a model
-func (db *UserDB) Get(filter bson.D, result *models.User) error {
+// GetOne implements the findOne action in a model
+func (db *UserDB) GetOne(filter bson.D, result *models.User) error {
 	return db.Users.FindOne(context.TODO(), filter).Decode(&result)
 }
 
