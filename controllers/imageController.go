@@ -176,6 +176,15 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 }
 
 // GetUserImages godoc
+// @Summary Let a user get its images
+// @Description Get user images
+// @ID user-images-endpoint
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} models.ImagesResponse
+// @Failure 401 {string} Authentication error
+// @Failure 500 {string} Server error
+// @Router /Image/FromUser [get]
 func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.Request) {
 	userID, _ := primitive.ObjectIDFromHex(r.Header.Get("uid"))
 	filter := bson.D{{"userId", userID}}
