@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
 
@@ -153,9 +154,10 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	oid, _ := primitive.ObjectIDFromHex(userID)
 
 	image := models.Image{
-		URL:   "/images" + imageURL,
-		Age:   age,
-		Owner: oid,
+		URL:       "/images" + imageURL,
+		Age:       age,
+		Owner:     oid,
+		CreatedAt: time.Now(),
 	}
 
 	_, err = controller.imageDB.Insert(image)
