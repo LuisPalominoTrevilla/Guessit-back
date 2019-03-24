@@ -64,6 +64,23 @@ info:
   title: GuessIt API
   version: "0.1"
 paths:
+  /Image/:
+    get:
+      description: Get all images
+      operationId: get-images-endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ImagesResponse'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Retrieve all images
   /Image/FromUser:
     get:
       description: Get user images

@@ -28,7 +28,14 @@ type ImageController struct {
 	authMiddleware *auth.Middleware
 }
 
-// Get serves as a simple get request for the model Image
+// Get godoc
+// @Summary Retrieve all images
+// @Description Get all images
+// @ID get-images-endpoint
+// @Produce json
+// @Success 200 {object} models.ImagesResponse
+// @Failure 500 {string} Server error
+// @Router /Image/ [get]
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 	images, err := controller.imageDB.Get(bson.D{})
 	if err != nil {
