@@ -17,7 +17,6 @@ type ImageDB struct {
 // Get retrieves filtered models from the database
 func (db *ImageDB) Get(filter bson.D) ([]*models.Image, error) {
 	cur, err := db.Images.Find(context.TODO(), filter)
-	fmt.Println("All good here")
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
