@@ -185,11 +185,9 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 		fmt.Fprintf(w, "Error trying to retrieve images from db")
 		return
 	}
-	type Response struct {
-		UserImages []*models.Image
-	}
-	response := Response{
-		UserImages: images,
+
+	response := models.ImagesResponse{
+		Images: images,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
