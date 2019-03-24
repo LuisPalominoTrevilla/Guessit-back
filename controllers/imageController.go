@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	database "github.com/LuisPalominoTrevilla/Guessit-back/db"
 	"github.com/LuisPalominoTrevilla/Guessit-back/redis"
 	"github.com/gorilla/mux"
+	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
@@ -173,11 +175,32 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	fmt.Fprint(w, "/images"+imageURL)
 }
 
+// GetUserImages godoc
+func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.Request) {
+	userID, _ := primitive.ObjectIDFromHex(r.Header.Get("uid"))
+	filter := bson.D{{"userId", userID}}
+	images, err := controller.imageDB.Get(filter)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "Error trying to retrieve images from db")
+		return
+	}
+	type Response struct {
+		UserImages []*models.Image
+	}
+	response := Response{
+		UserImages: images,
+	}
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
+}
+
 // InitializeController initializes the routes
 func (controller *ImageController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.Handle("/UploadImage", controller.authMiddleware.AccessControl(controller.UploadImage)).Methods(http.MethodPost)
-
+	r.Handle("/FromUser", controller.authMiddleware.AccessControl(controller.GetUserImages)).Methods(http.MethodGet)
 }
 
 // SetImageController creates the ImageController and wraps the user collection into ImageDB
