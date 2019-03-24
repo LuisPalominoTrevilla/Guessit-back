@@ -30,7 +30,19 @@ type ImageController struct {
 
 // Get serves as a simple get request for the model Image
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hola Mundo desde imágen")
+	images, err := controller.imageDB.Get(bson.D{})
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintf(w, "Error trying to retrieve images from db")
+		return
+	}
+
+	response := models.ImagesResponse{
+		Images: images,
+	}
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
 }
 
 func fileExists(fileName string) bool {
