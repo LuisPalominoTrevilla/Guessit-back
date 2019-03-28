@@ -18,3 +18,8 @@ type AuthenticationResponse struct {
 	Token  string             `json:"token"`
 	UserID primitive.ObjectID `json:"userId"`
 }
+
+// ImagesResponse holds an array of images as response
+type ImagesResponse struct {
+	Images []*Image `json:"images"`
+}

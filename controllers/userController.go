@@ -59,7 +59,7 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	filter := bson.D{{"username", credentials.Username}, {"password", credentials.Password}}
 	var loggedUser models.User
 	// Find user and password in database
-	err = controller.userDB.Get(filter, &loggedUser)
+	err = controller.userDB.GetOne(filter, &loggedUser)
 	if err != nil {
 		w.WriteHeader(401)
 		// TODO: Change this to return a JSON object
@@ -124,7 +124,7 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 	oid, _ := primitive.ObjectIDFromHex(userID)
 	filter := bson.D{{"_id", oid}}
 	var user models.User
-	err := controller.userDB.Get(filter, &user)
+	err := controller.userDB.GetOne(filter, &user)
 	if err != nil {
 		w.WriteHeader(401)
 		// TODO: Change this to return a JSON object

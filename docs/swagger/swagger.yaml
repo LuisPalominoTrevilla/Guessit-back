@@ -14,6 +14,26 @@ definitions:
       username:
         type: string
     type: object
+  models.Image:
+    properties:
+      age:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: string
+      url:
+        type: string
+      userId:
+        type: string
+    type: object
+  models.ImagesResponse:
+    properties:
+      images:
+        items:
+          $ref: '#/definitions/models.Image'
+        type: array
+    type: object
   models.PersonalDataResponse:
     properties:
       age:
@@ -44,6 +64,46 @@ info:
   title: GuessIt API
   version: "0.1"
 paths:
+  /Image/:
+    get:
+      description: Get all images
+      operationId: get-images-endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ImagesResponse'
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Retrieve all images
+  /Image/FromUser:
+    get:
+      description: Get user images
+      operationId: user-images-endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ImagesResponse'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Let a user get its images
   /Image/UploadImage:
     post:
       consumes:

@@ -15,7 +15,7 @@ func seedUser(userDB db.UserDB, user models.User) error {
 	fmt.Println("Trying to find user", user.Name, user.LastName, "in db")
 
 	var foundUser models.User
-	err := userDB.Get(filter, &foundUser)
+	err := userDB.GetOne(filter, &foundUser)
 
 	if err == mongo.ErrNoDocuments {
 		res, err := userDB.Insert(user)

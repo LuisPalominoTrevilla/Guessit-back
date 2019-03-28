@@ -17,7 +17,8 @@ type Model interface{}
 
 // Database is the interface that contains all relevant methods for each model
 type Database interface {
-	Get(bson.D, *Model)
+	Get(bson.D)
+	GetOne(bson.D, *Model)
 	Insert(Model)
 }
 
