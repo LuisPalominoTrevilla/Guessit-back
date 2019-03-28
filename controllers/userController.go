@@ -149,8 +149,9 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 func (controller *UserController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.HandleFunc("/Login", controller.Login).Methods(http.MethodPost)
-	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
 	r.Handle("/PersonalData", controller.authMiddleware.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
+	r.HandleFunc("/Register", controller.Register).Methods(http.MethodPost)
+	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
@@ -164,4 +165,71 @@ func SetUserController(r *mux.Router, db *mongo.Database, redisClient *redis.Cli
 		},
 	}
 	userController.InitializeController(r)
+}
+
+// Register godoc
+// @Summary Register
+// @Description Register new user to the database
+// @ID user-register
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "User"
+// @Success 200 {string} success message
+// @Failure 400 {string} error message
+// @Failure 409 {string} error message
+// @Failure 500 {string} error message
+func (controller *UserController) Register(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	decoder := json.NewDecoder(r.Body)
+
+	// Read credentials from request body
+	err := decoder.Decode(&user)
+	if err != nil {
+		fmt.Println("NO BODY PRESENT")
+		w.WriteHeader(400)
+		w.Write([]byte("No body present"))
+		return
+	}
+	// Create bson document to filter in DB
+	filter1 := bson.D{{"email", user.Email}}
+
+	var existing models.User
+	cErr := controller.userDB.Get(filter1, &existing)
+
+	if cErr == nil {
+		w.WriteHeader(409)
+		w.Write([]byte("This email is already being used"))
+		return
+	}
+
+	filter2 := bson.D{{"username", user.Username}}
+
+	cErr2 := controller.userDB.Get(filter2, &existing)
+
+	if cErr2 == nil {
+		w.WriteHeader(409)
+		w.Write([]byte("This username has already been taken"))
+		return
+	}
+
+	userToRegister := models.User{
+		Name:     user.Name,
+		Username: user.Username,
+		Image:    user.Image,
+		Email:    user.Email,
+		Gender:   user.Gender,
+		LastName: user.LastName,
+		Password: user.Password,
+		Age:      user.Age,
+	}
+
+	_, cErr3 := controller.userDB.Insert(userToRegister)
+
+	if cErr3 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("We're having some issues, please try again later"))
+
+		return
+	}
+
 }

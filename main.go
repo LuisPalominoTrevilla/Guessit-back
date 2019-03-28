@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	database := db.InitDb()
 	seeder.SeedModels(database)
 
