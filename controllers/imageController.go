@@ -66,7 +66,7 @@ func fileExists(fileName string) bool {
 // @Param image formData file true "Image to be uploaded"
 // @Param age formData string true "Age that corresponts to the person in the image"
 // @Security Bearer
-// @Success 200 {string} OK
+// @Success 200 {object} models.Image
 // @Failure 400 {string} Bad request
 // @Failure 401 {string} Authentication error
 // @Failure 413 {string} File too large
