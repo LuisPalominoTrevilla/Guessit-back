@@ -181,7 +181,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		CreatedAt: time.Now(),
 	}
 
-	_, err = controller.imageDB.Insert(image)
+	result, err := controller.imageDB.Insert(image)
 
 	if err != nil {
 		println(err.Error())
@@ -190,8 +190,10 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		fmt.Fprint(w, "Error trying to insert image into db")
 		return
 	}
-
-	fmt.Fprint(w, "/images"+imageURL)
+	image.ID = result.InsertedID.(primitive.ObjectID)
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(image)
 }
 
 // GetUserImages godoc

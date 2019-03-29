@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -103,7 +102,7 @@ func (controller *UserController) Logout(w http.ResponseWriter, r *http.Request)
 	}
 	err = controller.redisClient.SetExpArbitraryPair("blacklist:"+r.Header.Get("token"), expInt, "")
 	if err != nil {
-		log.Panic(err)
+		fmt.Println(err)
 	}
 	fmt.Fprintf(w, "Logged out")
 }
@@ -194,7 +193,7 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 	filter1 := bson.D{{"email", user.Email}}
 
 	var existing models.User
-	cErr := controller.userDB.Get(filter1, &existing)
+	cErr := controller.userDB.GetOne(filter1, &existing)
 
 	if cErr == nil {
 		w.WriteHeader(409)
@@ -204,7 +203,7 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 
 	filter2 := bson.D{{"username", user.Username}}
 
-	cErr2 := controller.userDB.Get(filter2, &existing)
+	cErr2 := controller.userDB.GetOne(filter2, &existing)
 
 	if cErr2 == nil {
 		w.WriteHeader(409)
