@@ -51,6 +51,27 @@ definitions:
       username:
         type: string
     type: object
+  models.User:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      lastName:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:5000
 info:
   contact:
@@ -127,7 +148,8 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/models.Image'
+            type: object
         "400":
           description: Bad Request
           schema:

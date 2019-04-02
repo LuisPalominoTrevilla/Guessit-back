@@ -66,7 +66,7 @@ func fileExists(fileName string) bool {
 // @Param image formData file true "Image to be uploaded"
 // @Param age formData string true "Age that corresponts to the person in the image"
 // @Security Bearer
-// @Success 200 {string} OK
+// @Success 200 {object} models.Image
 // @Failure 400 {string} Bad request
 // @Failure 401 {string} Authentication error
 // @Failure 413 {string} File too large
@@ -181,7 +181,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		CreatedAt: time.Now(),
 	}
 
-	_, err = controller.imageDB.Insert(image)
+	result, err := controller.imageDB.Insert(image)
 
 	if err != nil {
 		println(err.Error())
@@ -190,8 +190,10 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		fmt.Fprint(w, "Error trying to insert image into db")
 		return
 	}
-
-	fmt.Fprint(w, "/images"+imageURL)
+	image.ID = result.InsertedID.(primitive.ObjectID)
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(image)
 }
 
 // GetUserImages godoc
