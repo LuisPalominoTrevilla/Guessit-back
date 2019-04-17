@@ -19,6 +19,8 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
+
+	"github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 )
 
 // ImageController wraps the ImageDB inside the controller
@@ -37,7 +39,33 @@ type ImageController struct {
 // @Failure 500 {string} Server error
 // @Router /Image/ [get]
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
-	images, err := controller.imageDB.Get(bson.D{})
+	var userID string
+
+	auth := strings.Fields(r.Header.Get("Authorization"))
+	if len(auth) > 1 && auth[0] == "Bearer" {
+		claims, err := authentication.VerifyJWT(auth[1])
+
+		if err == nil {
+			userID = claims["userId"].(string)
+		}
+	}
+
+	filter := bson.D{}
+
+	if userID != "" {
+		uid, _ := primitive.ObjectIDFromHex(userID)
+
+		filter = bson.D{{
+			"userId",
+			bson.D{{
+				"$ne",
+				uid,
+			}},
+		}}
+		fmt.Println(filter)
+	}
+
+	images, err := controller.imageDB.Get(filter)
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Error trying to retrieve images from db")
