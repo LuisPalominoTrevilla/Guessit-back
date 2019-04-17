@@ -31,7 +31,7 @@ type ImageController struct {
 }
 
 // Get godoc
-// @Summary Retrieve all images
+// @Summary Retrieve all images. If user is logged in, his/her images are not returned.
 // @Description Get all images
 // @ID get-images-endpoint
 // @Produce json
