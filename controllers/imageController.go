@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/LuisPalominoTrevilla/Guessit-back/modules"
+
 	"github.com/LuisPalominoTrevilla/Guessit-back/models"
 
 	auth "github.com/LuisPalominoTrevilla/Guessit-back/authentication"
@@ -40,6 +42,8 @@ type ImageController struct {
 // @Router /Image/ [get]
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 	var userID string
+	// var ratedImages []primitive.ObjectID
+	logedIn := false
 
 	auth := strings.Fields(r.Header.Get("Authorization"))
 	if len(auth) > 1 && auth[0] == "Bearer" {
@@ -47,12 +51,13 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 
 		if err == nil {
 			userID = claims["userId"].(string)
+			logedIn = true
 		}
 	}
 
 	filter := bson.D{}
 
-	if userID != "" {
+	if !logedIn {
 		uid, _ := primitive.ObjectIDFromHex(userID)
 
 		filter = bson.D{{
@@ -62,7 +67,14 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 				uid,
 			}},
 		}}
-		fmt.Println(filter)
+
+		res, err := modules.RetrieveRatedFromCookie("ratedPics", r)
+
+		if err != nil {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println("Cookie value is " + res)
+		}
 	}
 
 	images, err := controller.imageDB.Get(filter)
