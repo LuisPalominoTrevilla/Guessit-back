@@ -68,13 +68,9 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 			}},
 		}}
 
-		res, err := modules.RetrieveRatedFromCookie("ratedPics", r)
+		ratedImageIds := modules.RetrieveRatedFromCookie("ratedPics", r)
 
-		if err != nil {
-			fmt.Println(err.Error())
-		} else {
-			fmt.Println("Cookie value is " + res)
-		}
+		fmt.Println("Rated images are ", ratedImageIds)
 	}
 
 	images, err := controller.imageDB.Get(filter)
