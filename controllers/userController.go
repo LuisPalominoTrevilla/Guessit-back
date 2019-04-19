@@ -212,14 +212,15 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 	}
 
 	userToRegister := models.User{
-		Name:     user.Name,
-		Username: user.Username,
-		Image:    user.Image,
-		Email:    user.Email,
-		Gender:   user.Gender,
-		LastName: user.LastName,
-		Password: user.Password,
-		Age:      user.Age,
+		Name:        user.Name,
+		Username:    user.Username,
+		Image:       user.Image,
+		Email:       user.Email,
+		Gender:      user.Gender,
+		LastName:    user.LastName,
+		Password:    user.Password,
+		Age:         user.Age,
+		RatedImages: []string{},
 	}
 
 	_, cErr3 := controller.userDB.Insert(userToRegister)
