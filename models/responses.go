@@ -23,3 +23,9 @@ type AuthenticationResponse struct {
 type ImagesResponse struct {
 	Images []*Image `json:"images"`
 }
+
+// GuessResponse holds the result from the guess made by the user
+type GuessResponse struct {
+	Correct bool   `json:"correct"`
+	Message string `json:"message"`
+}

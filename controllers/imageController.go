@@ -257,7 +257,7 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 
 	decoder := json.NewDecoder(r.Body)
 	imageID := mux.Vars(r)["id"]
-	loggedIn, userID := modules.IsAuthed(r)
+	loggedIn, _ := modules.IsAuthed(r)
 	err = decoder.Decode(&guess)
 
 	if err != nil || guess.Age == nil {
@@ -304,7 +304,14 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 			return
 		}
 		modules.AddCookieValue("ratedPics", imageID, w, r)
-		fmt.Fprint(w, "All good", userID)
+		correctGuess, responseMessage := modules.CalculateAgeGuessResponse(image.Age, *guess.Age)
+		response := models.GuessResponse{
+			Correct: correctGuess,
+			Message: responseMessage,
+		}
+		w.Header().Add("Content-Type", "application/json")
+		encoder := json.NewEncoder(w)
+		encoder.Encode(response)
 	}
 }
 
