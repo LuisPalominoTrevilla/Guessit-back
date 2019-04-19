@@ -21,8 +21,6 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
-
-	"github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 )
 
 // ImageController wraps the ImageDB inside the controller
@@ -42,23 +40,13 @@ type ImageController struct {
 // @Failure 500 {string} Server error
 // @Router /Image/ [get]
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
-	var userID string
 	// var ratedImages []primitive.ObjectID
-	logedIn := false
 
-	auth := strings.Fields(r.Header.Get("Authorization"))
-	if len(auth) > 1 && auth[0] == "Bearer" {
-		claims, err := authentication.VerifyJWT(auth[1])
-
-		if err == nil {
-			userID = claims["userId"].(string)
-			logedIn = true
-		}
-	}
+	loggedIn, userID := modules.IsAuthed(r)
 
 	filter := bson.D{}
 
-	if !logedIn {
+	if !loggedIn {
 		uid, _ := primitive.ObjectIDFromHex(userID)
 
 		filter = bson.D{{
@@ -261,11 +249,23 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 	encoder.Encode(response)
 }
 
+// RateImage godoc
+func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Request) {
+	imageID := mux.Vars(r)["id"]
+	loggedIn, userID := modules.IsAuthed(r)
+
+	if !loggedIn {
+		modules.AddCookieValue("ratedPics", imageID, w, r)
+		fmt.Fprint(w, "All good", userID)
+	}
+}
+
 // InitializeController initializes the routes
 func (controller *ImageController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.Handle("/UploadImage", controller.authMiddleware.AccessControl(controller.UploadImage)).Methods(http.MethodPost)
 	r.Handle("/FromUser", controller.authMiddleware.AccessControl(controller.GetUserImages)).Methods(http.MethodGet)
+	r.HandleFunc("/{id}/Rate", controller.RateImage).Methods(http.MethodPost)
 }
 
 // SetImageController creates the ImageController and wraps the user collection into ImageDB

@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -25,4 +26,29 @@ func RetrieveRatedFromCookie(cookieName string, r *http.Request) []primitive.Obj
 		}
 	}
 	return ratedImages
+}
+
+// AddCookieValue adds a value to a cookie. If cookie doesn't exist, then it is created
+func AddCookieValue(cookieName string, newValue string, w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Cookies())
+	ratedCookie, err := r.Cookie(cookieName)
+	var chips *http.Cookie
+
+	if err != nil {
+		chips = &http.Cookie{
+			Name:   cookieName,
+			Value:  newValue + ",",
+			Path:   "/",
+			MaxAge: 0,
+		}
+		http.SetCookie(w, chips)
+	} else {
+		chips = &http.Cookie{
+			Name:   cookieName,
+			Value:  ratedCookie.Value + newValue + ",",
+			Path:   "/",
+			MaxAge: 0,
+		}
+	}
+	http.SetCookie(w, chips)
 }
