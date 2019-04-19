@@ -40,13 +40,13 @@ type ImageController struct {
 // @Failure 500 {string} Server error
 // @Router /Image/ [get]
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
-	// var ratedImages []primitive.ObjectID
+	var ratedImages map[primitive.ObjectID]bool = make(map[primitive.ObjectID]bool)
 
 	loggedIn, userID := modules.IsAuthed(r)
 
 	filter := bson.D{}
 
-	if !loggedIn {
+	if loggedIn {
 		uid, _ := primitive.ObjectIDFromHex(userID)
 
 		filter = bson.D{{
@@ -56,12 +56,18 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 				uid,
 			}},
 		}}
-
-		ratedImageIds := modules.RetrieveRatedFromCookie("ratedPics", r)
-
-		fmt.Println("Rated images are ", ratedImageIds)
+	} else {
+		rated := modules.RetrieveRatedFromCookie("ratedPics", r)
+		for _, id := range rated {
+			oid, err := primitive.ObjectIDFromHex(id)
+			if err != nil {
+				continue
+			}
+			ratedImages[oid] = true
+		}
 	}
 
+	filteredImages := []*models.Image{}
 	images, err := controller.imageDB.Get(filter)
 	if err != nil {
 		w.WriteHeader(500)
@@ -69,8 +75,14 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, img := range images {
+		if !ratedImages[img.ID] {
+			filteredImages = append(filteredImages, img)
+		}
+	}
+
 	response := models.ImagesResponse{
-		Images: images,
+		Images: filteredImages,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
