@@ -251,10 +251,46 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 
 // RateImage godoc
 func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Request) {
+	var image models.Image
+	var guess models.AgeGuess
+	var err error
+
+	decoder := json.NewDecoder(r.Body)
 	imageID := mux.Vars(r)["id"]
 	loggedIn, userID := modules.IsAuthed(r)
+	err = decoder.Decode(&guess)
+
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "Faltan parámetros")
+		return
+	}
+
+	iid, err := primitive.ObjectIDFromHex(imageID)
+
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "Formato de imágen incorrecto")
+		return
+	}
+
+	err = controller.imageDB.GetOne(bson.D{{"_id", iid}}, &image)
+
+	if err != nil {
+		w.WriteHeader(404)
+		fmt.Fprintf(w, "No se encontró la imagen")
+		return
+	}
 
 	if !loggedIn {
+		ratedImages := modules.RetrieveRatedFromCookie("ratedPics", r)
+
+		if modules.Contains(ratedImages, imageID) {
+			w.WriteHeader(409)
+			fmt.Fprintf(w, "La imágen ya ha sido calificada")
+			return
+		}
+
 		modules.AddCookieValue("ratedPics", imageID, w, r)
 		fmt.Fprint(w, "All good", userID)
 	}

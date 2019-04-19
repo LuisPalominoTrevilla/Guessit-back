@@ -36,6 +36,11 @@ func (db *ImageDB) Get(filter bson.D) ([]*models.Image, error) {
 	return result, nil
 }
 
+// GetOne implements the findOne action in a model
+func (db *ImageDB) GetOne(filter bson.D, result *models.Image) error {
+	return db.Images.FindOne(context.TODO(), filter).Decode(&result)
+}
+
 // Insert implements the InsertOne action in a model
 func (db *ImageDB) Insert(image models.Image) (*mongo.InsertOneResult, error) {
 	return db.Images.InsertOne(context.TODO(), image)
