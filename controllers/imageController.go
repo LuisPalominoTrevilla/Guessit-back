@@ -28,6 +28,7 @@ import (
 // ImageController wraps the ImageDB inside the controller
 type ImageController struct {
 	imageDB        *database.ImageDB
+	rateDB         *database.RateDB
 	redisClient    *redis.Client
 	authMiddleware *auth.Middleware
 }
@@ -270,8 +271,10 @@ func (controller *ImageController) InitializeController(r *mux.Router) {
 // SetImageController creates the ImageController and wraps the user collection into ImageDB
 func SetImageController(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
 	image := database.ImageDB{Images: db.Collection("images")}
+	rate := database.RateDB{Rates: db.Collection("rates")}
 	ImageController := ImageController{
 		imageDB:     &image,
+		rateDB:      &rate,
 		redisClient: redisClient,
 		authMiddleware: &auth.Middleware{
 			RedisClient: redisClient,
