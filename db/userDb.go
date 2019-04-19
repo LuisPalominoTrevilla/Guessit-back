@@ -22,3 +22,8 @@ func (db *UserDB) GetOne(filter bson.D, result *models.User) error {
 func (db *UserDB) Insert(user models.User) (*mongo.InsertOneResult, error) {
 	return db.Users.InsertOne(context.TODO(), user)
 }
+
+// UpdateOne updates a document in the database
+func (db *UserDB) UpdateOne(filter bson.D, update bson.D) (*mongo.UpdateResult, error) {
+	return db.Users.UpdateOne(context.TODO(), filter, update)
+}
