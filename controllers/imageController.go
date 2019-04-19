@@ -27,6 +27,7 @@ import (
 type ImageController struct {
 	imageDB        *database.ImageDB
 	rateDB         *database.RateDB
+	userDB         *database.UserDB
 	redisClient    *redis.Client
 	authMiddleware *auth.Middleware
 }
@@ -269,7 +270,7 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 
 	decoder := json.NewDecoder(r.Body)
 	imageID := mux.Vars(r)["id"]
-	loggedIn, _ := modules.IsAuthed(r)
+	loggedIn, userID := modules.IsAuthed(r)
 	err = decoder.Decode(&guess)
 
 	if err != nil || guess.Age == nil {
@@ -316,15 +317,63 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 			return
 		}
 		modules.AddCookieValue("ratedPics", imageID, w, r)
-		correctGuess, responseMessage := modules.CalculateAgeGuessResponse(image.Age, *guess.Age)
-		response := models.GuessResponse{
-			Correct: correctGuess,
-			Message: responseMessage,
+	} else {
+		var user models.User
+		uid, _ := primitive.ObjectIDFromHex(userID)
+		userFilter := bson.D{{"_id", uid}}
+
+		err = controller.userDB.GetOne(userFilter, &user)
+
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Ocurrió un error al calificar la imágen")
+			return
 		}
-		w.Header().Add("Content-Type", "application/json")
-		encoder := json.NewEncoder(w)
-		encoder.Encode(response)
+
+		ratedImages := user.RatedImages
+
+		if modules.Contains(ratedImages, imageID) {
+			w.WriteHeader(409)
+			fmt.Fprintf(w, "La imágen ya ha sido calificada")
+			return
+		}
+		rate := models.Rate{
+			ImageID:    iid,
+			FromAuth:   true,
+			GuessedAge: *guess.Age,
+		}
+
+		_, err = controller.rateDB.Insert(rate)
+
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Ocurrió un error al calificar la imágen")
+			return
+		}
+
+		ratedImages = append(ratedImages, imageID)
+		updatedUser := bson.D{
+			{"$set",
+				bson.D{
+					{"ratedImages", ratedImages},
+				}},
+		}
+		_, err = controller.userDB.UpdateOne(userFilter, updatedUser)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
+
+	correctGuess, responseMessage := modules.CalculateAgeGuessResponse(image.Age, *guess.Age)
+	response := models.GuessResponse{
+		Correct: correctGuess,
+		Message: responseMessage,
+	}
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
 }
 
 // InitializeController initializes the routes
@@ -339,9 +388,12 @@ func (controller *ImageController) InitializeController(r *mux.Router) {
 func SetImageController(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
 	image := database.ImageDB{Images: db.Collection("images")}
 	rate := database.RateDB{Rates: db.Collection("rates")}
+	user := database.UserDB{Users: db.Collection("users")}
+
 	ImageController := ImageController{
 		imageDB:     &image,
 		rateDB:      &rate,
+		userDB:      &user,
 		redisClient: redisClient,
 		authMiddleware: &auth.Middleware{
 			RedisClient: redisClient,
