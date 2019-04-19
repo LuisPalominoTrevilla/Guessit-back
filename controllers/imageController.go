@@ -68,7 +68,7 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 			ratedIds = user.RatedImages
 		}
 	} else {
-		ratedIds = modules.RetrieveRatedFromCookie("ratedPics", r)
+		ratedIds = modules.RetrieveRatedFromCookie(os.Getenv("RATED_COOKIE"), r)
 	}
 
 	for _, id := range ratedIds {
@@ -307,7 +307,7 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 	}
 
 	if !loggedIn {
-		ratedImages := modules.RetrieveRatedFromCookie("ratedPics", r)
+		ratedImages := modules.RetrieveRatedFromCookie(os.Getenv("RATED_COOKIE"), r)
 
 		if modules.Contains(ratedImages, imageID) {
 			w.WriteHeader(409)
@@ -327,7 +327,7 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 			fmt.Fprintf(w, "Ocurrió un error al calificar la imágen")
 			return
 		}
-		modules.AddCookieValue("ratedPics", imageID, w, r)
+		modules.AddCookieValue(os.Getenv("RATED_COOKIE"), imageID, w, r)
 	} else {
 		var user models.User
 		uid, _ := primitive.ObjectIDFromHex(userID)
