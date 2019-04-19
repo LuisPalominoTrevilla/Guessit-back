@@ -13,5 +13,5 @@ type User struct {
 	Password    string             `json:"password"`
 	Gender      string             `json:"gender"`
 	Age         int                `json:"age"`
-	RatedImages []string           `json:"ratedImages"`
+	RatedImages []string           `json:"ratedImages" bson:"ratedImages"`
 }
