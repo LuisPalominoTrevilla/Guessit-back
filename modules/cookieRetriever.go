@@ -16,8 +16,8 @@ func RetrieveRatedFromCookie(cookieName string, r *http.Request) []string {
 
 	value := ratedCookie.Value
 	rawIds := strings.Split(value, ",")
-	for i := range rawIds {
-		ratedImages = append(ratedImages, rawIds[i])
+	for _, rawID := range rawIds {
+		ratedImages = append(ratedImages, rawID)
 	}
 	return ratedImages
 }
