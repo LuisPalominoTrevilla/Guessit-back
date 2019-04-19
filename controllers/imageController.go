@@ -260,7 +260,7 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 	loggedIn, userID := modules.IsAuthed(r)
 	err = decoder.Decode(&guess)
 
-	if err != nil {
+	if err != nil || guess.Age == nil {
 		w.WriteHeader(400)
 		fmt.Fprintf(w, "Faltan parámetros")
 		return
@@ -290,7 +290,19 @@ func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Requ
 			fmt.Fprintf(w, "La imágen ya ha sido calificada")
 			return
 		}
+		rate := models.Rate{
+			ImageID:    iid,
+			FromAuth:   false,
+			GuessedAge: *guess.Age,
+		}
 
+		_, err = controller.rateDB.Insert(rate)
+
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Ocurrió un error al calificar la imágen")
+			return
+		}
 		modules.AddCookieValue("ratedPics", imageID, w, r)
 		fmt.Fprint(w, "All good", userID)
 	}
