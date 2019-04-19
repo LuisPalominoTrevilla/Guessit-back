@@ -42,12 +42,14 @@ type ImageController struct {
 // @Router /Image/ [get]
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 	var ratedImages map[primitive.ObjectID]bool = make(map[primitive.ObjectID]bool)
+	var ratedIds []string
 
 	loggedIn, userID := modules.IsAuthed(r)
 
 	filter := bson.D{}
 
 	if loggedIn {
+		var user models.User
 		uid, _ := primitive.ObjectIDFromHex(userID)
 
 		filter = bson.D{{
@@ -57,15 +59,24 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 				uid,
 			}},
 		}}
-	} else {
-		rated := modules.RetrieveRatedFromCookie("ratedPics", r)
-		for _, id := range rated {
-			oid, err := primitive.ObjectIDFromHex(id)
-			if err != nil {
-				continue
-			}
-			ratedImages[oid] = true
+
+		err := controller.userDB.GetOne(bson.D{{"_id", uid}}, &user)
+
+		if err != nil {
+			ratedIds = []string{}
+		} else {
+			ratedIds = user.RatedImages
 		}
+	} else {
+		ratedIds = modules.RetrieveRatedFromCookie("ratedPics", r)
+	}
+
+	for _, id := range ratedIds {
+		oid, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			continue
+		}
+		ratedImages[oid] = true
 	}
 
 	filteredImages := []*models.Image{}
