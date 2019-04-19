@@ -274,6 +274,18 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 }
 
 // RateImage godoc
+// @Summary Allows a user to rate an image
+// @ID rate-image-endpoint
+// @Accept json
+// @Produce json
+// @Param guess body models.AgeGuess true "Guess attempt from the user"
+// @Param id path string true "ID of the image that needs to be rated"
+// @Success 200 {object} models.GuessResponse
+// @Failure 400 {string} Bad request
+// @Failure 404 {string} Image not found
+// @Failure 409 {string} Rate conflict
+// @Failure 500 {string} Server error
+// @Router /Image/{id}/Rate [post]
 func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Request) {
 	var image models.Image
 	var guess models.AgeGuess
