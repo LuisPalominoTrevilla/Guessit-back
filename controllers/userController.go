@@ -186,7 +186,7 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		fmt.Println("NO BODY PRESENT")
 		w.WriteHeader(400)
-		w.Write([]byte("No body present"))
+		w.Write([]byte("JSON sin cuerpo"))
 		return
 	}
 	// Create bson document to filter in DB
@@ -197,7 +197,7 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 
 	if cErr == nil {
 		w.WriteHeader(409)
-		w.Write([]byte("This email is already being used"))
+		w.Write([]byte("Ya hay una cuenta vinculada a este correo."))
 		return
 	}
 
@@ -207,7 +207,7 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 
 	if cErr2 == nil {
 		w.WriteHeader(409)
-		w.Write([]byte("This username has already been taken"))
+		w.Write([]byte("Ese nombre de usuario ya está en uso."))
 		return
 	}
 
@@ -226,7 +226,7 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 
 	if cErr3 != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("We're having some issues, please try again later"))
+		w.Write([]byte("Estamos teniendo problemas, intenta de nuevo más tarde."))
 
 		return
 	}
