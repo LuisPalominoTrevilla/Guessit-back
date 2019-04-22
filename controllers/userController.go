@@ -50,7 +50,7 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	// Read credentials from request body
 	err := decoder.Decode(&credentials)
 	if err != nil {
-		fmt.Println("NO BODY PRESENT")
+		fmt.Println("No hay cuerpo presente")
 		w.WriteHeader(400)
 		return
 	}
@@ -62,7 +62,7 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(401)
 		// TODO: Change this to return a JSON object
-		fmt.Fprintf(w, "User or password incorrect")
+		fmt.Fprintf(w, "Usuario o contraseña incorrecta")
 		return
 	}
 
@@ -70,7 +70,7 @@ func (controller *UserController) Login(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.WriteHeader(500)
 		// TODO: Change this to return a JSON object
-		fmt.Fprintf(w, "Error generating jwt")
+		fmt.Fprintf(w, "Error generando jwt")
 		return
 	}
 	// TODO: Place line below inside middleware
@@ -104,7 +104,7 @@ func (controller *UserController) Logout(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Fprintf(w, "Logged out")
+	fmt.Fprintf(w, "Se cerró la sesión")
 }
 
 // PersonalData godoc
@@ -127,7 +127,7 @@ func (controller *UserController) PersonalData(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.WriteHeader(401)
 		// TODO: Change this to return a JSON object
-		fmt.Fprintf(w, "Error while getting user")
+		fmt.Fprintf(w, "Error consiguiendo datos del usuario.")
 		return
 	}
 	response := models.PersonalDataResponse{
