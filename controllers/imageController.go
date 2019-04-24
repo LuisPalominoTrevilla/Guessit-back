@@ -40,7 +40,7 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 	images, err := controller.imageDB.Get(bson.D{})
 	if err != nil {
 		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error trying to retrieve images from db")
+		fmt.Fprintf(w, "Error consiguiendo las imágenes de la base de datos.")
 		return
 	}
 
@@ -84,19 +84,19 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(500)
-		fmt.Fprint(w, "Error parsing multiform data")
+		fmt.Fprint(w, "Error interpretando los datos.")
 		return
 	}
 
 	// Ensure that both the image and age are contained in multipartform
 	if len(r.MultipartForm.File["image"]) == 0 {
 		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing image")
+		fmt.Fprint(w, "Falta la imagen.")
 		return
 	}
 	if len(r.MultipartForm.Value["age"]) == 0 {
 		w.WriteHeader(400)
-		fmt.Fprint(w, "Missing age")
+		fmt.Fprint(w, "Falta la edad.")
 		return
 	}
 	// get userId from header
@@ -107,7 +107,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(400)
-		fmt.Fprint(w, "Age is not a number")
+		fmt.Fprint(w, "La edad proporcionada no es un número.")
 		return
 	}
 
@@ -118,19 +118,19 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(500)
-		fmt.Fprint(w, "Error opening image file")
+		fmt.Fprint(w, "Error abriendo archivo de imagen.")
 		return
 	}
 
 	if _, exists := validImageFormats[imFileHeader.Header["Content-Type"][0]]; !exists {
 		w.WriteHeader(400)
-		fmt.Fprint(w, "File uploaded does not have a valid image format")
+		fmt.Fprint(w, "El archivo seleccionado no tiene formato de imagen válido.")
 		return
 	}
 
 	if imFileHeader.Size/1000000 > 5 {
 		w.WriteHeader(413)
-		fmt.Fprint(w, "Image uploaded is more than 5 MB")
+		fmt.Fprint(w, "La imagen pesa más de 5 MB.")
 		return
 	}
 
@@ -159,7 +159,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(500)
-		fmt.Fprint(w, "Error creating file")
+		fmt.Fprint(w, "Error creando archivo.")
 		return
 	}
 
@@ -168,7 +168,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(500)
-		fmt.Fprint(w, "Error copying image file")
+		fmt.Fprint(w, "Error copiando el archivo de imagen.")
 		return
 	}
 
@@ -187,7 +187,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 		println(err.Error())
 		_ = os.Remove(("/static" + imageURL))
 		w.WriteHeader(500)
-		fmt.Fprint(w, "Error trying to insert image into db")
+		fmt.Fprint(w, "Error al momento de subir la imagen a la base de datos.")
 		return
 	}
 	image.ID = result.InsertedID.(primitive.ObjectID)
@@ -212,7 +212,7 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 	images, err := controller.imageDB.Get(filter)
 	if err != nil {
 		w.WriteHeader(500)
-		fmt.Fprintf(w, "Error trying to retrieve images from db")
+		fmt.Fprintf(w, "Error intentando conseguir imágenes de la base de datos.")
 		return
 	}
 
