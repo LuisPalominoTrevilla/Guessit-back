@@ -23,7 +23,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Retrieve all images",
+                "summary": "Retrieve all images. If user is logged in, his/her images are not returned.",
                 "operationId": "get-images-endpoint",
                 "responses": {
                     "200": {

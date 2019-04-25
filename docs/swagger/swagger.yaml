@@ -101,7 +101,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Retrieve all images
+      summary: Retrieve all images. If user is logged in, his/her images are not returned.
   /Image/FromUser:
     get:
       description: Get user images
