@@ -1,5 +1,10 @@
 basePath: /api
 definitions:
+  models.AgeGuess:
+    properties:
+      age:
+        type: integer
+    type: object
   models.AuthenticationResponse:
     properties:
       token:
@@ -12,6 +17,13 @@ definitions:
       password:
         type: string
       username:
+        type: string
+    type: object
+  models.GuessResponse:
+    properties:
+      correct:
+        type: boolean
+      message:
         type: string
     type: object
   models.Image:
@@ -69,6 +81,10 @@ definitions:
         type: string
       password:
         type: string
+      ratedImages:
+        items:
+          type: string
+        type: array
       username:
         type: string
     type: object
@@ -102,6 +118,49 @@ paths:
           schema:
             type: string
       summary: Retrieve all images. If user is logged in, his/her images are not returned.
+  /Image/{id}/Rate:
+    post:
+      consumes:
+      - application/json
+      operationId: rate-image-endpoint
+      parameters:
+      - description: Guess attempt from the user
+        in: body
+        name: guess
+        required: true
+        schema:
+          $ref: '#/definitions/models.AgeGuess'
+          type: object
+      - description: ID of the image that needs to be rated
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GuessResponse'
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "409":
+          description: Conflict
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Allows a user to rate an image
   /Image/FromUser:
     get:
       description: Get user images

@@ -21,13 +21,13 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
-
-	"github.com/LuisPalominoTrevilla/Guessit-back/authentication"
 )
 
 // ImageController wraps the ImageDB inside the controller
 type ImageController struct {
 	imageDB        *database.ImageDB
+	rateDB         *database.RateDB
+	userDB         *database.UserDB
 	redisClient    *redis.Client
 	authMiddleware *auth.Middleware
 }
@@ -41,23 +41,15 @@ type ImageController struct {
 // @Failure 500 {string} Server error
 // @Router /Image/ [get]
 func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
-	var userID string
-	// var ratedImages []primitive.ObjectID
-	logedIn := false
+	var ratedImages map[primitive.ObjectID]bool = make(map[primitive.ObjectID]bool)
+	var ratedIds []string
 
-	auth := strings.Fields(r.Header.Get("Authorization"))
-	if len(auth) > 1 && auth[0] == "Bearer" {
-		claims, err := authentication.VerifyJWT(auth[1])
-
-		if err == nil {
-			userID = claims["userId"].(string)
-			logedIn = true
-		}
-	}
+	loggedIn, userID := modules.IsAuthed(r)
 
 	filter := bson.D{}
 
-	if !logedIn {
+	if loggedIn {
+		var user models.User
 		uid, _ := primitive.ObjectIDFromHex(userID)
 
 		filter = bson.D{{
@@ -68,11 +60,26 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 			}},
 		}}
 
-		ratedImageIds := modules.RetrieveRatedFromCookie("ratedPics", r)
+		err := controller.userDB.GetOne(bson.D{{"_id", uid}}, &user)
 
-		fmt.Println("Rated images are ", ratedImageIds)
+		if err != nil {
+			ratedIds = []string{}
+		} else {
+			ratedIds = user.RatedImages
+		}
+	} else {
+		ratedIds = modules.RetrieveRatedFromCookie(os.Getenv("RATED_COOKIE"), r)
 	}
 
+	for _, id := range ratedIds {
+		oid, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			continue
+		}
+		ratedImages[oid] = true
+	}
+
+	filteredImages := []*models.Image{}
 	images, err := controller.imageDB.Get(filter)
 	if err != nil {
 		w.WriteHeader(500)
@@ -80,8 +87,14 @@ func (controller *ImageController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, img := range images {
+		if !ratedImages[img.ID] {
+			filteredImages = append(filteredImages, img)
+		}
+	}
+
 	response := models.ImagesResponse{
-		Images: images,
+		Images: filteredImages,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
@@ -260,18 +273,150 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 	encoder.Encode(response)
 }
 
+// RateImage godoc
+// @Summary Allows a user to rate an image
+// @ID rate-image-endpoint
+// @Accept json
+// @Produce json
+// @Param guess body models.AgeGuess true "Guess attempt from the user"
+// @Param id path string true "ID of the image that needs to be rated"
+// @Success 200 {object} models.GuessResponse
+// @Failure 400 {string} Bad request
+// @Failure 404 {string} Image not found
+// @Failure 409 {string} Rate conflict
+// @Failure 500 {string} Server error
+// @Router /Image/{id}/Rate [post]
+func (controller *ImageController) RateImage(w http.ResponseWriter, r *http.Request) {
+	var image models.Image
+	var guess models.AgeGuess
+	var err error
+
+	decoder := json.NewDecoder(r.Body)
+	imageID := mux.Vars(r)["id"]
+	loggedIn, userID := modules.IsAuthed(r)
+	err = decoder.Decode(&guess)
+
+	if err != nil || guess.Age == nil {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "Faltan parámetros")
+		return
+	}
+
+	iid, err := primitive.ObjectIDFromHex(imageID)
+
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprintf(w, "Formato de imágen incorrecto")
+		return
+	}
+
+	err = controller.imageDB.GetOne(bson.D{{"_id", iid}}, &image)
+
+	if err != nil {
+		w.WriteHeader(404)
+		fmt.Fprintf(w, "No se encontró la imagen")
+		return
+	}
+
+	if !loggedIn {
+		ratedImages := modules.RetrieveRatedFromCookie(os.Getenv("RATED_COOKIE"), r)
+
+		if modules.Contains(ratedImages, imageID) {
+			w.WriteHeader(409)
+			fmt.Fprintf(w, "La imágen ya ha sido calificada")
+			return
+		}
+		rate := models.Rate{
+			ImageID:    iid,
+			FromAuth:   false,
+			GuessedAge: *guess.Age,
+		}
+
+		_, err = controller.rateDB.Insert(rate)
+
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Ocurrió un error al calificar la imágen")
+			return
+		}
+		modules.AddCookieValue(os.Getenv("RATED_COOKIE"), imageID, w, r)
+	} else {
+		var user models.User
+		uid, _ := primitive.ObjectIDFromHex(userID)
+		userFilter := bson.D{{"_id", uid}}
+
+		err = controller.userDB.GetOne(userFilter, &user)
+
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Ocurrió un error al calificar la imágen")
+			return
+		}
+
+		ratedImages := user.RatedImages
+
+		if modules.Contains(ratedImages, imageID) {
+			w.WriteHeader(409)
+			fmt.Fprintf(w, "La imágen ya ha sido calificada")
+			return
+		}
+		rate := models.Rate{
+			ImageID:    iid,
+			FromAuth:   true,
+			GuessedAge: *guess.Age,
+		}
+
+		_, err = controller.rateDB.Insert(rate)
+
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Ocurrió un error al calificar la imágen")
+			return
+		}
+
+		ratedImages = append(ratedImages, imageID)
+		updatedUser := bson.D{
+			{"$set",
+				bson.D{
+					{"ratedImages", ratedImages},
+				}},
+		}
+		_, err = controller.userDB.UpdateOne(userFilter, updatedUser)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	}
+
+	correctGuess, responseMessage := modules.CalculateAgeGuessResponse(image.Age, *guess.Age)
+	response := models.GuessResponse{
+		Correct: correctGuess,
+		Message: responseMessage,
+	}
+	w.Header().Add("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	encoder.Encode(response)
+}
+
 // InitializeController initializes the routes
 func (controller *ImageController) InitializeController(r *mux.Router) {
 	r.HandleFunc("/", controller.Get).Methods(http.MethodGet)
 	r.Handle("/UploadImage", controller.authMiddleware.AccessControl(controller.UploadImage)).Methods(http.MethodPost)
 	r.Handle("/FromUser", controller.authMiddleware.AccessControl(controller.GetUserImages)).Methods(http.MethodGet)
+	r.HandleFunc("/{id}/Rate", controller.RateImage).Methods(http.MethodPost)
 }
 
 // SetImageController creates the ImageController and wraps the user collection into ImageDB
 func SetImageController(r *mux.Router, db *mongo.Database, redisClient *redis.Client) {
 	image := database.ImageDB{Images: db.Collection("images")}
+	rate := database.RateDB{Rates: db.Collection("rates")}
+	user := database.UserDB{Users: db.Collection("users")}
+
 	ImageController := ImageController{
 		imageDB:     &image,
+		rateDB:      &rate,
+		userDB:      &user,
 		redisClient: redisClient,
 		authMiddleware: &auth.Middleware{
 			RedisClient: redisClient,

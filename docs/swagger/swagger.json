@@ -145,6 +145,70 @@
                 }
             }
         },
+        "/Image/{id}/Rate": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Allows a user to rate an image",
+                "operationId": "rate-image-endpoint",
+                "parameters": [
+                    {
+                        "description": "Guess attempt from the user",
+                        "name": "guess",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/models.AgeGuess"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the image that needs to be rated",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/models.GuessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/User/Login": {
             "post": {
                 "description": "login user to system",
@@ -264,6 +328,14 @@
         }
     },
     "definitions": {
+        "models.AgeGuess": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.AuthenticationResponse": {
             "type": "object",
             "properties": {
@@ -282,6 +354,17 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GuessResponse": {
+            "type": "object",
+            "properties": {
+                "correct": {
+                    "type": "boolean"
+                },
+                "message": {
                     "type": "string"
                 }
             }
@@ -369,6 +452,12 @@
                 },
                 "password": {
                     "type": "string"
+                },
+                "ratedImages": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "username": {
                     "type": "string"
