@@ -246,7 +246,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 }
 
 // GetUserImages godoc
-// @Summary Let a user get its images
+// @Summary Let a user get its images with statistics
 // @Description Get user images
 // @ID user-images-endpoint
 // @Produce json
