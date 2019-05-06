@@ -251,7 +251,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 // @ID user-images-endpoint
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} models.ImagesResponse
+// @Success 200 {object} models.UserImagesResponse
 // @Failure 401 {string} Authentication error
 // @Failure 500 {string} Server error
 // @Router /Image/FromUser [get]
@@ -264,9 +264,47 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 		fmt.Fprintf(w, "Error intentando conseguir imágenes de la base de datos.")
 		return
 	}
+	var imagesResponse []*models.StatisticalImage
+	for _, image := range images {
+		var imageStats *models.StatisticalImage
+		registeredGuess := &models.ImageGuess{
+			Quantity: 0,
+			Correct:  0,
+		}
+		unregisteredGuess := &models.ImageGuess{
+			Quantity: 0,
+			Correct:  0,
+		}
 
-	response := models.ImagesResponse{
-		Images: images,
+		ratesFilter := bson.D{{"imageid", image.ID}}
+		rates, err := controller.rateDB.Get(ratesFilter)
+		if err == nil {
+			for _, rate := range rates {
+				if rate.FromAuth {
+					registeredGuess.Quantity++
+					if rate.GuessedAge == image.Age {
+						registeredGuess.Correct++
+					}
+				} else {
+					unregisteredGuess.Quantity++
+					if rate.GuessedAge == image.Age {
+						unregisteredGuess.Correct++
+					}
+				}
+			}
+			imageStats = &models.StatisticalImage{
+				URL:                 image.URL,
+				Age:                 image.Age,
+				CreatedAt:           image.CreatedAt,
+				RegisteredGuesses:   registeredGuess,
+				UnregisteredGuesses: unregisteredGuess,
+			}
+			imagesResponse = append(imagesResponse, imageStats)
+		}
+	}
+
+	response := models.UserImagesResponse{
+		Images: imagesResponse,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
