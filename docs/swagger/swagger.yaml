@@ -39,6 +39,13 @@ definitions:
       userId:
         type: string
     type: object
+  models.ImageGuess:
+    properties:
+      correct:
+        type: integer
+      quantity:
+        type: integer
+    type: object
   models.ImagesResponse:
     properties:
       images:
@@ -61,6 +68,23 @@ definitions:
       name:
         type: string
       username:
+        type: string
+    type: object
+  models.StatisticalImage:
+    properties:
+      age:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: string
+      registeredGuesses:
+        $ref: '#/definitions/models.ImageGuess'
+        type: object
+      unregisteredGuesses:
+        $ref: '#/definitions/models.ImageGuess'
+        type: object
+      url:
         type: string
     type: object
   models.User:
@@ -87,6 +111,13 @@ definitions:
         type: array
       username:
         type: string
+    type: object
+  models.UserImagesResponse:
+    properties:
+      images:
+        items:
+          $ref: '#/definitions/models.StatisticalImage'
+        type: array
     type: object
 host: localhost:5000
 info:
@@ -171,7 +202,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ImagesResponse'
+            $ref: '#/definitions/models.UserImagesResponse'
             type: object
         "401":
           description: Unauthorized
@@ -183,7 +214,7 @@ paths:
             type: string
       security:
       - Bearer: []
-      summary: Let a user get its images
+      summary: Let a user get its images with statistics
   /Image/UploadImage:
     post:
       consumes:

@@ -53,14 +53,14 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Let a user get its images",
+                "summary": "Let a user get its images with statistics",
                 "operationId": "user-images-endpoint",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/models.ImagesResponse"
+                            "$ref": "#/definitions/models.UserImagesResponse"
                         }
                     },
                     "401": {
@@ -389,6 +389,17 @@
                 }
             }
         },
+        "models.ImageGuess": {
+            "type": "object",
+            "properties": {
+                "correct": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.ImagesResponse": {
             "type": "object",
             "properties": {
@@ -422,6 +433,31 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.StatisticalImage": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "registeredGuesses": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.ImageGuess"
+                },
+                "unregisteredGuesses": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.ImageGuess"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -461,6 +497,17 @@
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "models.UserImagesResponse": {
+            "type": "object",
+            "properties": {
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StatisticalImage"
+                    }
                 }
             }
         }
