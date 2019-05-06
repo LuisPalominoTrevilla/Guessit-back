@@ -293,6 +293,7 @@ func (controller *ImageController) GetUserImages(w http.ResponseWriter, r *http.
 				}
 			}
 			imageStats = &models.StatisticalImage{
+				ID:                  image.ID,
 				URL:                 image.URL,
 				Age:                 image.Age,
 				CreatedAt:           image.CreatedAt,

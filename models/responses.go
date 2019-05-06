@@ -42,11 +42,12 @@ type ImageGuess struct {
 
 // StatisticalImage holds all statistics and information of a particular image
 type StatisticalImage struct {
-	URL                 string      `json:"url"`
-	Age                 int         `json:"age"`
-	RegisteredGuesses   *ImageGuess `json:"registeredGuesses"`
-	UnregisteredGuesses *ImageGuess `json:"unregisteredGuesses"`
-	CreatedAt           time.Time   `json:"createdAt"`
+	ID                  primitive.ObjectID `json:"id"`
+	URL                 string             `json:"url"`
+	Age                 int                `json:"age"`
+	RegisteredGuesses   *ImageGuess        `json:"registeredGuesses"`
+	UnregisteredGuesses *ImageGuess        `json:"unregisteredGuesses"`
+	CreatedAt           time.Time          `json:"createdAt"`
 }
 
 // UserImagesResponse holds an array of user images with statistical data
