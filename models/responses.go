@@ -1,6 +1,10 @@
 package models
 
-import "github.com/mongodb/mongo-go-driver/bson/primitive"
+import (
+	"time"
+
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
+)
 
 // PersonalDataResponse holds personal data from a user
 type PersonalDataResponse struct {
@@ -28,4 +32,24 @@ type ImagesResponse struct {
 type GuessResponse struct {
 	Correct bool   `json:"correct"`
 	Message string `json:"message"`
+}
+
+// ImageGuess holds information about guesses from an image
+type ImageGuess struct {
+	Quantity int `json:"quantity"`
+	Correct  int `json:"correct"`
+}
+
+// StatisticalImage holds all statistics and information of a particular image
+type StatisticalImage struct {
+	URL                 string      `json:"url"`
+	Age                 int         `json:"age"`
+	RegisteredGuesses   *ImageGuess `json:"registeredGuesses"`
+	UnregisteredGuesses *ImageGuess `json:"unregisteredGuesses"`
+	CreatedAt           time.Time   `json:"createdAt"`
+}
+
+// UserImagesResponse holds an array of user images with statistical data
+type UserImagesResponse struct {
+	Images []*StatisticalImage `json:"images"`
 }
