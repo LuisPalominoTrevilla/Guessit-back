@@ -316,8 +316,6 @@ func (controller *UserController) UpdateProfile(w http.ResponseWriter, r *http.R
 
 	filterDoc := bson.D{{"email", existing.Email}}
 
-	fmt.Println(filterDoc)
-
 	updateDoc := bson.D{{"$set", bson.D{{"name", userToUpdate.Name},
 		{"image", userToUpdate.Image},
 		{"username", userToUpdate.Username},
@@ -325,9 +323,7 @@ func (controller *UserController) UpdateProfile(w http.ResponseWriter, r *http.R
 		{"lastname", userToUpdate.LastName},
 		{"password", userToUpdate.Password},
 		{"gender", userToUpdate.Gender},
-		{"age", userToUpdate.Age}}}}
-
-	fmt.Println(updateDoc)
+		{"age", userToUpdate.Age}}}
 
 	_, cErr2 := controller.userDB.UpdateOne(filterDoc, updateDoc)
 
