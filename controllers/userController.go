@@ -323,7 +323,7 @@ func (controller *UserController) UpdateProfile(w http.ResponseWriter, r *http.R
 		{"lastname", userToUpdate.LastName},
 		{"password", userToUpdate.Password},
 		{"gender", userToUpdate.Gender},
-		{"age", userToUpdate.Age}}}
+		{"age", userToUpdate.Age}}}}
 
 	_, cErr2 := controller.userDB.UpdateOne(filterDoc, updateDoc)
 
