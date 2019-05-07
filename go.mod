@@ -5,28 +5,27 @@ require (
 	dmitri.shuralyov.com/app/changes v0.0.0-20181114035150-5af16e21babb // indirect
 	dmitri.shuralyov.com/service/change v0.0.0-20190301072032-c25fb47d71b3 // indirect
 	git.apache.org/thrift.git v0.12.0 // indirect
-	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/Shopify/sarama v1.21.0 // indirect
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc
 	github.com/coreos/go-systemd v0.0.0-20190212144455-93d5ec2c7f76 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gin-contrib/sse v0.0.0-20190301062529-5545eab6dad3 // indirect
 	github.com/gliderlabs/ssh v0.1.3 // indirect
 	github.com/go-chi/chi v4.0.2+incompatible // indirect
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-openapi/analysis v0.18.0 // indirect
 	github.com/go-openapi/errors v0.18.0 // indirect
 	github.com/go-openapi/inflect v0.18.0 // indirect
-	github.com/go-openapi/jsonpointer v0.18.0 // indirect
+	github.com/go-openapi/jsonpointer v0.19.0 // indirect
+	github.com/go-openapi/jsonreference v0.19.0 // indirect
 	github.com/go-openapi/loads v0.18.0 // indirect
 	github.com/go-openapi/runtime v0.18.0 // indirect
+	github.com/go-openapi/spec v0.19.0 // indirect
 	github.com/go-openapi/strfmt v0.18.0 // indirect
-	github.com/go-openapi/swag v0.18.0 // indirect
+	github.com/go-openapi/swag v0.19.0 // indirect
 	github.com/go-openapi/validate v0.18.0 // indirect
 	github.com/go-swagger/go-swagger v0.18.0 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/lint v0.0.0-20190301231843-5614ed5bae6f // indirect
-	github.com/golang/protobuf v1.3.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/pprof v0.0.0-20190228041337-2ef8d84b2e3c // indirect
@@ -40,8 +39,8 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/kisielk/errcheck v1.2.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/mailru/easyjson v0.0.0-20190221075403-6243d8e04c3f // indirect
-	github.com/mattn/go-isatty v0.0.6 // indirect
+	github.com/kr/pty v1.1.4 // indirect
+	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/mongodb/mongo-go-driver v0.3.0
 	github.com/openzipkin/zipkin-go v0.1.5 // indirect
@@ -66,26 +65,27 @@ require (
 	github.com/shurcooL/webdavfs v0.0.0-20181215192745-5988b2d638f6 // indirect
 	github.com/sirupsen/logrus v1.3.0 // indirect
 	github.com/spf13/viper v1.3.1 // indirect
+	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/swaggo/files v0.0.0-20190110041405-30649e0721f8 // indirect
-	github.com/swaggo/gin-swagger v1.1.0 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20190219123516-d2bf002bf65b
-	github.com/swaggo/swag v1.4.1
+	github.com/swaggo/swag v1.5.0
 	github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51 // indirect
 	github.com/toqueteos/webbrowser v1.1.0 // indirect
-	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
+	github.com/ugorji/go v1.1.4 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.opencensus.io v0.19.0 // indirect
 	go4.org v0.0.0-20190218023631-ce4c26f7be8e // indirect
 	golang.org/x/build v0.0.0-20190301201919-f7b27185a0a4 // indirect
-	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25 // indirect
+	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734 // indirect
 	golang.org/x/exp v0.0.0-20190301171323-01c40f57f5f6 // indirect
 	golang.org/x/lint v0.0.0-20190301231843-5614ed5bae6f // indirect
-	golang.org/x/net v0.0.0-20190301231341-16b79f2e4e95 // indirect
+	golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c // indirect
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421 // indirect
 	golang.org/x/perf v0.0.0-20190124201629-844a5f5b46f4 // indirect
-	golang.org/x/sys v0.0.0-20190228124157-a34e9553db1e // indirect
-	golang.org/x/tools v0.0.0-20190228203856-589c23e65e65 // indirect
+	golang.org/x/sys v0.0.0-20190502175342-a43fa875dd82 // indirect
+	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/tools v0.0.0-20190503185657-3b6f9c0030f7 // indirect
 	google.golang.org/genproto v0.0.0-20190227213309-4f5b463f9597 // indirect
 	honnef.co/go/tools v0.0.0-20190215041234-466a0476246c // indirect
 	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect

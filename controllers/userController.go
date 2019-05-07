@@ -151,6 +151,7 @@ func (controller *UserController) InitializeController(r *mux.Router) {
 	r.Handle("/PersonalData", controller.authMiddleware.AccessControl(controller.PersonalData)).Methods(http.MethodGet)
 	r.HandleFunc("/Register", controller.Register).Methods(http.MethodPost)
 	r.Handle("/Logout", controller.authMiddleware.AccessControl(controller.Logout)).Methods(http.MethodPost)
+	r.HandleFunc("/Update", controller.UpdateProfile).Methods(http.MethodPut)
 }
 
 // SetUserController creates the userController and wraps the user collection into UserDB
@@ -177,6 +178,7 @@ func SetUserController(r *mux.Router, db *mongo.Database, redisClient *redis.Cli
 // @Failure 400 {string} error message
 // @Failure 409 {string} error message
 // @Failure 500 {string} error message
+// @Router /User/Register [post]
 func (controller *UserController) Register(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	decoder := json.NewDecoder(r.Body)
@@ -229,6 +231,106 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Estamos teniendo problemas, intenta de nuevo más tarde."))
 
+		return
+	}
+
+}
+
+// UpdateProfile godoc
+// @Summary Update Profile
+// @Description Allows to modify an user's registry in the database
+// @ID update-profile
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "User"
+// @Success 200 {string} success message
+// @Failure 400 {string} error message
+// @Failure 409 {string} error message
+// @Failure 500 {string} error message
+// @Router /User/Register [patch]
+func (controller *UserController) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	decoder := json.NewDecoder(r.Body)
+
+	// Read credentials from request body
+	err := decoder.Decode(&user)
+
+	if err != nil {
+		fmt.Println("NO BODY PRESENT")
+		w.WriteHeader(400)
+		w.Write([]byte("JSON sin cuerpo"))
+		return
+	}
+
+	// Create bson document to find user that wants to update data in DB
+	filter1 := bson.D{{"email", user.Email}}
+
+	var existing models.User
+	cErr := controller.userDB.GetOne(filter1, &existing)
+
+	if cErr != nil {
+		w.WriteHeader(409)
+		w.Write([]byte("No existe una cuenta vinculada a este correo."))
+		return
+	}
+
+	userToUpdate := models.User{
+		Name:        existing.Name,
+		Username:    existing.Username,
+		Image:       existing.Image,
+		Email:       existing.Email,
+		Gender:      existing.Gender,
+		LastName:    existing.LastName,
+		Password:    existing.Password,
+		Age:         existing.Age,
+		RatedImages: existing.RatedImages,
+	}
+
+	if len(user.Username) > 0 {
+		userToUpdate.Username = user.Username
+	}
+
+	if len(user.Image) > 0 {
+		userToUpdate.Image = user.Image
+	}
+
+	if len(user.Name) > 0 {
+		userToUpdate.Name = user.Name
+	}
+
+	if len(user.LastName) > 0 {
+		userToUpdate.LastName = user.LastName
+	}
+
+	if len(user.Gender) > 0 {
+		userToUpdate.Gender = user.Gender
+	}
+
+	if user.Age > 0 {
+		userToUpdate.Age = user.Age
+	}
+
+	if len(user.Password) > 0 {
+		userToUpdate.Password = user.Password
+	}
+
+	filterDoc := bson.D{{"email", existing.Email}}
+
+	updateDoc := bson.D{{"$set", bson.D{{"name", userToUpdate.Name},
+		{"image", userToUpdate.Image},
+		{"username", userToUpdate.Username},
+		{"email", userToUpdate.Email},
+		{"lastname", userToUpdate.LastName},
+		{"password", userToUpdate.Password},
+		{"gender", userToUpdate.Gender},
+		{"age", userToUpdate.Age}}}}
+
+	_, cErr2 := controller.userDB.UpdateOne(filterDoc, updateDoc)
+
+	if cErr2 != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("No se pudieron actualizar los datos. Intenta más tarde por favor."))
+		fmt.Println(cErr2)
 		return
 	}
 
