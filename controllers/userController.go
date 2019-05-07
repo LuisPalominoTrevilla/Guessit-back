@@ -236,6 +236,18 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 
 }
 
+// UpdateProfile godoc
+// @Summary Update Profile
+// @Description Allows to modify an user's registry in the database
+// @ID update-profile
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "User"
+// @Success 200 {string} success message
+// @Failure 400 {string} error message
+// @Failure 409 {string} error message
+// @Failure 500 {string} error message
+// @Router /User/Register [patch]
 func (controller *UserController) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	decoder := json.NewDecoder(r.Body)
@@ -274,8 +286,6 @@ func (controller *UserController) UpdateProfile(w http.ResponseWriter, r *http.R
 		RatedImages: existing.RatedImages,
 	}
 
-	fmt.Println(user.Username)
-
 	if len(user.Username) > 0 {
 		userToUpdate.Username = user.Username
 	}
@@ -284,19 +294,40 @@ func (controller *UserController) UpdateProfile(w http.ResponseWriter, r *http.R
 		userToUpdate.Image = user.Image
 	}
 
+	if len(user.Name) > 0 {
+		userToUpdate.Name = user.Name
+	}
+
+	if len(user.LastName) > 0 {
+		userToUpdate.LastName = user.LastName
+	}
+
+	if len(user.Gender) > 0 {
+		userToUpdate.Gender = user.Gender
+	}
+
+	if user.Age > 0 {
+		userToUpdate.Age = user.Age
+	}
+
 	if len(user.Password) > 0 {
 		userToUpdate.Password = user.Password
 	}
 
-	filterDoc := bson.D{{"image", existing.Image},
-		{"username", existing.Username},
-		{"email", existing.Email},
-		{"password", existing.Password}}
+	filterDoc := bson.D{{"email", existing.Email}}
 
-	updateDoc := bson.D{{"$set", bson.D{{"image", userToUpdate.Image},
+	fmt.Println(filterDoc)
+
+	updateDoc := bson.D{{"$set", bson.D{{"name", userToUpdate.Name},
+		{"image", userToUpdate.Image},
 		{"username", userToUpdate.Username},
 		{"email", userToUpdate.Email},
-		{"password", userToUpdate.Password}}}}
+		{"lastname", userToUpdate.LastName},
+		{"password", userToUpdate.Password},
+		{"gender", userToUpdate.Gender},
+		{"age", userToUpdate.Age}}}}
+
+	fmt.Println(updateDoc)
 
 	_, cErr2 := controller.userDB.UpdateOne(filterDoc, updateDoc)
 

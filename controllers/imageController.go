@@ -130,6 +130,7 @@ func (controller *ImageController) UploadImage(w http.ResponseWriter, r *http.Re
 
 	// Parse multipart form data
 	err := r.ParseMultipartForm(maxBytes)
+
 	if err != nil {
 		println(err.Error())
 		w.WriteHeader(500)
